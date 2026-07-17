@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Deccan Airways</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="home.html" class="nav-logo">
+            <span>✈</span> Deccan Airways <span style="font-size:0.8rem; background:rgba(234,88,12,0.15); color:#ea580c; padding:0.15rem 0.4rem; border-radius:0.25rem; font-weight:800; margin-left:0.25rem;">ADMIN</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="home.html">Flights</a></li>
+            <li><a href="booking.html">My Bookings</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="admin.html" class="active" style="color:#ea580c; font-weight:800;">Admin Panel</a></li>
+            <li>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme">🌓</button>
+            </li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-info">
+                <div class="nav-user-name" id="userName">Loading...</div>
+                <div class="nav-user-role" id="userRole">Admin</div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Log Out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Analytics Section -->
+        <h2 style="margin-bottom: 1rem; font-weight:800; letter-spacing:-0.01em;">Live Business Analytics (Stream Engine)</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="statRevenue">$0.00</div>
+                <div class="stat-lbl">Total Confirmed Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statFlights">0</div>
+                <div class="stat-lbl">Active Flights</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statBookings">0</div>
+                <div class="stat-lbl">Confirmed / Cancelled</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statAvgPrice">$0.00</div>
+                <div class="stat-lbl">Average Ticket Price</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2">
+            <!-- Add/Edit Flight Form -->
+            <div class="card" id="flightFormCard">
+                <h2 class="card-title" id="formTitle">Add New Flight</h2>
+                <div id="formAlert"></div>
+                <form id="flightForm">
+                    <input type="hidden" id="flightId">
+                    
+                    <div class="grid grid-cols-2" style="gap:1rem;">
+                        <div class="form-group">
+                            <label for="flightNumber" class="form-label">Flight Number</label>
+                            <input type="text" id="flightNumber" class="form-control" placeholder="e.g. DA-101" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="airline" class="form-label">Airline Name</label>
+                            <input type="text" id="airline" class="form-control" placeholder="e.g. Deccan Airways" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2" style="gap:1rem;">
+                        <div class="form-group">
+                            <label for="flSource" class="form-label">From (Source)</label>
+                            <input type="text" id="flSource" class="form-control" placeholder="e.g. Mumbai" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="flDestination" class="form-label">To (Destination)</label>
+                            <input type="text" id="flDestination" class="form-control" placeholder="e.g. Dubai" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2" style="gap:1rem;">
+                        <div class="form-group">
+                            <label for="departureTime" class="form-label">Departure Time</label>
+                            <input type="datetime-local" id="departureTime" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="arrivalTime" class="form-label">Arrival Time</label>
+                            <input type="datetime-local" id="arrivalTime" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2" style="gap:1rem;">
+                        <div class="form-group">
+                            <label for="price" class="form-label">Price (USD)</label>
+                            <input type="number" step="0.01" id="price" class="form-control" placeholder="299" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="totalSeats" class="form-label">Total Seats Capacity</label>
+                            <input type="number" id="totalSeats" class="form-control" placeholder="150" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2" style="gap:1rem;">
+                        <div class="form-group">
+                            <label for="flightType" class="form-label">Flight Type</label>
+                            <select id="flightType" class="form-control" required>
+                                <option value="DOMESTIC">DOMESTIC (Requires Passport)</option>
+                                <option value="INTERNATIONAL">INTERNATIONAL (Requires Visa)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="imageUrl" class="form-label">Flight Cover Image URL</label>
+                            <input type="url" id="imageUrl" class="form-control" placeholder="e.g. https://images.unsplash.com/...">
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex:2;" id="submitBtn">Save Flight</button>
+                        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="resetForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Global Flights List -->
+            <div class="card">
+                <h2 class="card-title">Manage Flights</h2>
+                <div class="table-responsive" style="max-height: 520px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Flight Details</th>
+                                <th>Route Info</th>
+                                <th>Seats Status</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminFlightsBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary);">Loading flights...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Bookings Management -->
+        <div class="card" style="margin-top: 2rem;">
+            <h2 class="card-title">Monitor Global Passenger Bookings</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Passenger Details</th>
+                            <th>Flight No</th>
+                            <th>Route</th>
+                            <th>Seat No</th>
+                            <th>Booking Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBookingsBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-secondary);">Loading passenger files...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================
+             COUPON MANAGEMENT SECTION
+             ============================================ -->
+        <div class="card" style="margin-top: 2rem;">
+            <h2 class="card-title">🎟️ Coupon Management</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.92rem;">Create and manage discount coupons. Active coupons appear as highlighted banners on the landing and home pages for all users.</p>
+
+            <div class="grid grid-cols-2" style="gap: 2rem; align-items: start;">
+                <!-- Add Coupon Form -->
+                <div>
+                    <h3 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-primary);">➕ Add New Coupon</h3>
+                    <div id="couponFormAlert"></div>
+                    <form id="couponForm">
+                        <div class="grid grid-cols-2" style="gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="couponCode">Coupon Code</label>
+                                <input type="text" id="couponCode" class="form-control" placeholder="e.g. SUMMER25" required style="text-transform: uppercase; font-family: monospace; font-size: 1rem; letter-spacing: 0.05em;" oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="couponDiscount">Discount Percentage (%)</label>
+                                <input type="number" id="couponDiscount" class="form-control" placeholder="e.g. 20" min="1" max="90" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="couponExpiry">Expiry Date (Optional)</label>
+                            <input type="date" id="couponExpiry" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">🎟️ Create & Publish Coupon</button>
+                    </form>
+
+                    <div style="margin-top: 1.25rem; padding: 1rem; background: rgba(37,99,235,0.05); border: 1px solid rgba(37,99,235,0.15); border-radius: 0.75rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        <strong style="color: var(--accent);">💡 How it works:</strong><br>
+                        Once you add a coupon, it will be displayed as a highlighted animated banner on the <strong>Home</strong> and <strong>Landing</strong> pages. Users can apply it at checkout for a discount.
+                    </div>
+                </div>
+
+                <!-- Active Coupons List -->
+                <div>
+                    <h3 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-primary);">📋 Active Coupons</h3>
+                    <div id="couponsList" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 380px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================
+             DOCUMENT VERIFICATION SECTION
+             ============================================ -->
+        <div class="card" style="margin-top: 2rem;">
+            <h2 class="card-title">📄 Document Verification</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.92rem;">Review user-submitted travel documents. Once verified, the user's profile will show a ✅ Verified badge and they can book flights. <strong>Only verified users can book tickets.</strong></p>
+
+            <div id="docVerifAlert"></div>
+            <div id="docSubmissionsList">
+                <div style="text-align:center; padding:2rem; color:var(--text-secondary);">Loading submissions...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Theme management
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (!res.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                const result = await res.json();
+                currentUser = result.data;
+                
+                // RESTRICT strictly to admin@gmail.com and role ADMIN
+                if (currentUser.role !== 'ADMIN' || currentUser.email !== 'admin@gmail.com') {
+                    window.location.href = 'home.html';
+                    return;
+                }
+
+                document.getElementById('userName').textContent = currentUser.name;
+
+                loadAdminData();
+            } catch (err) {
+                console.error(err);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'login.html';
+        }
+
+        // Load all data
+        function loadAdminData() {
+            fetchStats();
+            fetchFlights();
+            fetchGlobalBookings();
+        }
+
+        // Fetch Analytics Stats
+        async function fetchStats() {
+            try {
+                const flightStatsRes = await fetch('/api/flights/stats');
+                const flightStatsData = await flightStatsRes.json();
+
+                const bookingStatsRes = await fetch('/api/bookings/stats');
+                const bookingStatsData = await bookingStatsRes.json();
+
+                if (flightStatsData.success && bookingStatsData.success) {
+                    const fStats = flightStatsData.data;
+                    const bStats = bookingStatsData.data;
+
+                    document.getElementById('statRevenue').textContent = `$${bStats.totalRevenue.toFixed(2)}`;
+                    document.getElementById('statFlights').textContent = fStats.totalFlights;
+                    document.getElementById('statBookings').textContent = `${bStats.confirmedBookings} Conf. / ${bStats.cancelledBookings} Cxl.`;
+                    document.getElementById('statAvgPrice').textContent = `$${fStats.averagePrice.toFixed(2)}`;
+                }
+            } catch (e) {
+                console.error('Error fetching analytics:', e);
+            }
+        }
+
+        // Fetch Flights
+        async function fetchFlights() {
+            const tbody = document.getElementById('adminFlightsBody');
+            try {
+                const res = await fetch('/api/flights');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(flight => {
+                        const typeLabel = flight.flightType || 'DOMESTIC';
+                        const typeColor = typeLabel === 'INTERNATIONAL' ? '#7c3aed' : '#2563eb';
+                        
+                        const row = `
+                            <tr>
+                                <td>
+                                    <strong>${escapeHtml(flight.airline)}</strong><br>
+                                    <span style="font-family:monospace; font-size:0.8rem; color:var(--text-secondary); font-weight:700;">${escapeHtml(flight.flightNumber)}</span>
+                                </td>
+                                <td>
+                                    <strong>${escapeHtml(flight.source)} ➔ ${escapeHtml(flight.destination)}</strong><br>
+                                    <span style="font-size:0.75rem; color:${typeColor}; font-weight:700;">${typeLabel}</span>
+                                </td>
+                                <td>${flight.availableSeats} / ${flight.totalSeats} Available</td>
+                                <td style="color:var(--success); font-weight:800;">$${flight.price}</td>
+                                <td>
+                                    <div style="display:flex; gap:0.5rem;">
+                                        <button onclick="editFlight(${JSON.stringify(flight).replace(/"/g, '&quot;')})" class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Edit</button>
+                                        <button onclick="deleteFlight(${flight.id})" class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">No flights available.</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger);">Error loading flights.</td></tr>';
+                console.error(err);
+            }
+        }
+
+        // Fetch all passenger bookings
+        async function fetchGlobalBookings() {
+            const tbody = document.getElementById('adminBookingsBody');
+            try {
+                const res = await fetch('/api/bookings');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(booking => {
+                        const statusClass = booking.status.toLowerCase();
+                        const canCancel = booking.status === 'CONFIRMED';
+                        
+                        const row = `
+                            <tr>
+                                <td>#${booking.id}</td>
+                                <td>
+                                    <strong>${escapeHtml(booking.passengerName)}</strong><br>
+                                    <span style="font-size:0.8rem; color:var(--text-secondary);">${escapeHtml(booking.passengerEmail)}</span>
+                                </td>
+                                <td>${escapeHtml(booking.flight.flightNumber)}</td>
+                                <td>${escapeHtml(booking.flight.source)} ➔ ${escapeHtml(booking.flight.destination)}</td>
+                                <td><span style="font-family:monospace; background:rgba(0,0,0,0.05); padding:0.2rem 0.4rem; border-radius:0.25rem; font-weight:700;">${escapeHtml(booking.seatNumber)}</span></td>
+                                <td>${new Date(booking.bookingDate).toLocaleString([], {dateStyle:'short', timeStyle:'short'})}</td>
+                                <td><span class="status-pill ${statusClass}">${booking.status}</span></td>
+                                <td>
+                                    ${canCancel ? 
+                                        `<button onclick="cancelBooking(${booking.id})" class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Cancel Booking</button>` : 
+                                        `<span style="color:var(--text-secondary); font-style:italic;">No Action</span>`
+                                    }
+                                </td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-secondary);">No passenger reservations recorded.</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--danger);">Error loading reservations.</td></tr>';
+                console.error(err);
+            }
+        }
+
+        // Form Submit: Add/Edit Flight
+        document.getElementById('flightForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById('formAlert');
+            alertBox.innerHTML = '';
+
+            const id = document.getElementById('flightId').value;
+            const flightNumber = document.getElementById('flightNumber').value;
+            const airline = document.getElementById('airline').value;
+            const source = document.getElementById('flSource').value;
+            const destination = document.getElementById('flDestination').value;
+            const departureTime = document.getElementById('departureTime').value;
+            const arrivalTime = document.getElementById('arrivalTime').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const totalSeats = parseInt(document.getElementById('totalSeats').value);
+            const flightType = document.getElementById('flightType').value;
+            const imageUrl = document.getElementById('imageUrl').value;
+
+            const payload = {
+                flightNumber,
+                airline,
+                source,
+                destination,
+                departureTime,
+                arrivalTime,
+                price,
+                totalSeats,
+                availableSeats: totalSeats,
+                flightType,
+                imageUrl: imageUrl || null
+            };
+
+            let method = 'POST';
+            let url = '/api/flights';
+
+            if (id) {
+                method = 'PUT';
+                url = `/api/flights/${id}`;
+                payload.id = parseInt(id);
+                payload.availableSeats = totalSeats; // reset capacity on edits or match total seats
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    alertBox.innerHTML = `<div class="alert alert-success">Flight schedule saved successfully!</div>`;
+                    resetForm();
+                    loadAdminData();
+                } else {
+                    alertBox.innerHTML = `<div class="alert alert-danger">${result.message || 'Saving failed'}</div>`;
+                }
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger">Error saving flight.</div>`;
+                console.error(err);
+            }
+        });
+
+        // Edit flight action
+        function editFlight(flight) {
+            document.getElementById('formTitle').textContent = 'Edit Flight ' + flight.flightNumber;
+            document.getElementById('flightId').value = flight.id;
+            document.getElementById('flightNumber').value = flight.flightNumber;
+            document.getElementById('airline').value = flight.airline;
+            document.getElementById('flSource').value = flight.source;
+            document.getElementById('flDestination').value = flight.destination;
+            
+            // Format time for input datetime-local: YYYY-MM-DDTHH:MM
+            document.getElementById('departureTime').value = flight.departureTime.substring(0, 16);
+            document.getElementById('arrivalTime').value = flight.arrivalTime.substring(0, 16);
+            
+            document.getElementById('price').value = flight.price;
+            document.getElementById('totalSeats').value = flight.totalSeats;
+            document.getElementById('flightType').value = flight.flightType || 'DOMESTIC';
+            document.getElementById('imageUrl').value = flight.imageUrl || '';
+            
+            document.getElementById('submitBtn').textContent = 'Update Flight';
+            
+            // Scroll to form card
+            document.getElementById('flightFormCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Delete Flight
+        async function deleteFlight(id) {
+            if (!confirm('Are you sure you want to delete this flight? It will remove this schedule completely.')) return;
+            try {
+                const res = await fetch(`/api/flights/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    loadAdminData();
+                } else {
+                    alert('Failed to delete flight: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Cancel booking globally
+        async function cancelBooking(bookingId) {
+            if (!confirm('Cancel this passenger booking?')) return;
+            try {
+                const res = await fetch(`/api/bookings/${bookingId}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    loadAdminData();
+                } else {
+                    alert('Failed to cancel booking: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('formTitle').textContent = 'Add New Flight';
+            document.getElementById('flightId').value = '';
+            document.getElementById('flightForm').reset();
+            document.getElementById('submitBtn').textContent = 'Save Flight';
+        }
+
+        // Helper to avoid HTML Injection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // ============================================
+        //  COUPON MANAGEMENT
+        // ============================================
+
+        function loadCoupons() {
+            const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+            const list = document.getElementById('couponsList');
+
+            if (coupons.length === 0) {
+                list.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.9rem; padding: 1rem; text-align: center; background: var(--bg-primary); border-radius: 0.75rem;">No coupons created yet. Add your first coupon!</div>';
+                return;
+            }
+
+            list.innerHTML = coupons.map((c, idx) => `
+                <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1rem 1.25rem; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <span style="font-family: monospace; font-size: 1.05rem; font-weight: 800; color: var(--accent); letter-spacing: 0.05em; background: rgba(37,99,235,0.1); padding: 0.2rem 0.7rem; border-radius: 0.375rem;">${escapeHtml(c.code)}</span>
+                            <span style="background: rgba(16,185,129,0.1); color: var(--success); padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.82rem; font-weight: 700;">${c.discount}% OFF</span>
+                        </div>
+                        ${c.expiry ? `<div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">📅 Expires: ${c.expiry}</div>` : '<div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.35rem;">📅 No expiry</div>'}
+                        <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.25rem;">🟢 Active — Displayed on Home & Landing pages</div>
+                    </div>
+                    <button onclick="deleteCoupon(${idx})" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; flex-shrink: 0;">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('couponForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = document.getElementById('couponCode').value.trim().toUpperCase();
+            const discount = parseInt(document.getElementById('couponDiscount').value);
+            const expiry = document.getElementById('couponExpiry').value;
+            const alertEl = document.getElementById('couponFormAlert');
+
+            if (!code || isNaN(discount) || discount < 1 || discount > 90) {
+                alertEl.innerHTML = '<div class="alert alert-danger">⚠️ Please enter a valid coupon code and discount (1–90%).</div>';
+                return;
+            }
+
+            const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+
+            // Check duplicate
+            if (coupons.some(c => c.code.toUpperCase() === code)) {
+                alertEl.innerHTML = '<div class="alert alert-danger">⚠️ A coupon with this code already exists.</div>';
+                return;
+            }
+
+            coupons.push({ code, discount, expiry: expiry || null, createdAt: new Date().toISOString() });
+            localStorage.setItem('deccan_coupons', JSON.stringify(coupons));
+
+            alertEl.innerHTML = `<div class="alert alert-success">✅ Coupon <strong>${code}</strong> (${discount}% off) created and published!</div>`;
+            document.getElementById('couponForm').reset();
+            loadCoupons();
+
+            setTimeout(() => { alertEl.innerHTML = ''; }, 3000);
+        });
+
+        function deleteCoupon(idx) {
+            if (!confirm('Delete this coupon? It will no longer appear on the website.')) return;
+            const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+            coupons.splice(idx, 1);
+            localStorage.setItem('deccan_coupons', JSON.stringify(coupons));
+            loadCoupons();
+        }
+
+        // ============================================
+        //  DOCUMENT VERIFICATION
+        // ============================================
+
+        function loadDocSubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('doc_submissions') || '[]');
+            const list = document.getElementById('docSubmissionsList');
+
+            if (submissions.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-secondary); background:var(--bg-primary); border-radius:0.75rem;">No document submissions yet. Users will appear here once they submit passport/visa details from their Profile page.</div>';
+                return;
+            }
+
+            const rows = submissions.map((s, idx) => `
+                <tr>
+                    <td><strong>${escapeHtml(s.userName)}</strong></td>
+                    <td style="font-size:0.85rem;">${escapeHtml(s.userEmail)}</td>
+                    <td>
+                        <span style="background:rgba(37,99,235,0.1);color:var(--accent);padding:0.2rem 0.6rem;border-radius:0.25rem;font-size:0.82rem;font-weight:700;text-transform:uppercase;">
+                            ${s.type === 'passport' ? '🛂 Passport' : '🌍 Visa'}
+                        </span>
+                    </td>
+                    <td style="font-family:monospace; font-weight:700;">${escapeHtml(s.value)}</td>
+                    <td style="font-size:0.82rem; color:var(--text-secondary);">${new Date(s.submittedAt).toLocaleString()}</td>
+                    <td>
+                        ${s.status === 'verified'
+                            ? '<span style="background:rgba(22,163,74,0.1);color:var(--success);padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.82rem;font-weight:700;">✅ Verified</span>'
+                            : s.status === 'rejected'
+                                ? '<span style="background:rgba(239,68,68,0.1);color:var(--danger);padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.82rem;font-weight:700;">❌ Rejected</span>'
+                                : '<span style="background:rgba(234,88,12,0.1);color:var(--warning);padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.82rem;font-weight:700;">⏳ Pending</span>'
+                        }
+                    </td>
+                    <td>
+                        ${s.status !== 'verified' ? `<button onclick="verifyDoc(${idx},'verified')" class="btn btn-primary" style="padding:0.3rem 0.6rem;font-size:0.75rem;margin-right:0.25rem;">✅ Verify</button>` : ''}
+                        ${s.status !== 'rejected' ? `<button onclick="verifyDoc(${idx},'rejected')" class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;">❌ Reject</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+
+            list.innerHTML = `
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr>
+                            <th>User</th><th>Email</th><th>Document</th><th>Value</th><th>Submitted</th><th>Status</th><th>Actions</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function verifyDoc(idx, action) {
+            const submissions = JSON.parse(localStorage.getItem('doc_submissions') || '[]');
+            if (!submissions[idx]) return;
+
+            const sub = submissions[idx];
+            sub.status = action;
+            sub.reviewedAt = new Date().toISOString();
+            submissions[idx] = sub;
+            localStorage.setItem('doc_submissions', JSON.stringify(submissions));
+
+            // Update the user's verification record in localStorage
+            const verif = JSON.parse(localStorage.getItem('doc_verif_' + sub.userId) || '{}');
+            verif[sub.type] = action;
+            localStorage.setItem('doc_verif_' + sub.userId, JSON.stringify(verif));
+
+            const alertEl = document.getElementById('docVerifAlert');
+            const icon = action === 'verified' ? '✅' : '❌';
+            alertEl.innerHTML = `<div class="alert alert-${action === 'verified' ? 'success' : 'danger'}">${icon} Document ${action} for <strong>${escapeHtml(sub.userName)}</strong>. Their profile status has been updated.</div>`;
+            setTimeout(() => { alertEl.innerHTML = ''; }, 4000);
+            loadDocSubmissions();
+        }
+
+        checkAuth();
+        loadCoupons();
+        loadDocSubmissions();
+    </script>
+</body>
+</html>

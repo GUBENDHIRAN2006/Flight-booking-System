@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Deccan Airways</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .mini-boarding-pass {
+            background: linear-gradient(135deg, #0b0f19 0%, #1e3a5f 100%);
+            color: #fff;
+            border-radius: 0.75rem;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            font-family: 'Outfit', sans-serif;
+        }
+        .mbp-main { flex: 1; padding: 1.25rem; }
+        .mbp-stub { width: 100px; background: linear-gradient(135deg, #1e40af, #7c3aed); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0.5rem; position: relative; }
+        .mbp-stub::before { content:''; position:absolute; left:0; top:10px; bottom:10px; width:2px; background: repeating-linear-gradient(to bottom, transparent, transparent 6px, rgba(255,255,255,0.2) 6px, rgba(255,255,255,0.2) 9px); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="home.html" class="nav-logo">
+            <span>✈</span> Deccan Airways
+        </a>
+        <ul class="nav-links">
+            <li><a href="home.html">Flights</a></li>
+            <li><a href="booking.html" class="active">My Bookings</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li id="adminNavLink" style="display: none;"><a href="admin.html" style="color: #ea580c; font-weight: 700;">Admin Panel</a></li>
+            <li>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme">🌓</button>
+            </li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-info" style="cursor: pointer;" onclick="openProfileModal()" title="View/Edit Profile">
+                <div class="nav-user-name" id="userName">Loading...</div>
+                <div class="nav-user-role" id="userRole" style="color: var(--accent); font-weight: 600;">User ⚙</div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Log Out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">My Bookings</h2>
+            
+            <div id="alertContainer"></div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Flight</th>
+                            <th>Route</th>
+                            <th>Passenger Details</th>
+                            <th>Seat No</th>
+                            <th>Booking Date</th>
+                            <th>Status</th>
+                            <th>Ticket</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-secondary);">Loading your bookings...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal (View/Edit Basic Info, Passport, Visa) -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+            <h2 class="card-title">My Travel Profile</h2>
+            <div id="profileAlert"></div>
+            
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="profileName" class="form-label">Full Name</label>
+                    <input type="text" id="profileName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileEmail" class="form-label">Email Address</label>
+                    <input type="email" id="profileEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="profilePassword" class="form-label">Password (Leave blank to keep unchanged)</label>
+                    <input type="password" id="profilePassword" class="form-control" placeholder="••••••••">
+                </div>
+                
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 1rem 0; border-top: 1px solid var(--border-color); padding-top: 1rem;">Travel Documents</h3>
+                
+                <div class="form-group">
+                    <label for="profilePassport" class="form-label">Passport Number (Required for Domestic flights)</label>
+                    <input type="text" id="profilePassport" class="form-control" placeholder="e.g. L1234567">
+                </div>
+                <div class="form-group">
+                    <label for="profileVisa" class="form-label">Visa Details/ID (Required for International flights)</label>
+                    <input type="text" id="profileVisa" class="form-control" placeholder="e.g. V7654321 - UAE Valid">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Profile Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let bookingsData = {};
+
+        // Theme management
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (!res.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                const result = await res.json();
+                currentUser = result.data;
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userRole').textContent = currentUser.role === 'ADMIN' ? 'Admin ⚙' : 'User ⚙';
+
+                if (currentUser.role === 'ADMIN') {
+                    document.getElementById('adminNavLink').style.display = 'block';
+                }
+
+                loadBookings();
+            } catch (err) {
+                console.error(err);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'login.html';
+        }
+
+        // Load Bookings for current user
+        async function loadBookings() {
+            const tableBody = document.getElementById('bookingsTableBody');
+            try {
+                const res = await fetch(`/api/bookings/user/${currentUser.id}`);
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tableBody.innerHTML = '';
+                    result.data.forEach(booking => {
+                        const statusClass = booking.status.toLowerCase();
+                        const canCancel = booking.status === 'CONFIRMED';
+                        
+                        const row = `
+                            <tr>
+                                <td>#${booking.id}</td>
+                                <td>
+                                    <strong>${escapeHtml(booking.flight.airline)}</strong><br>
+                                    <span style="font-size:0.8rem; color:var(--text-secondary); font-weight: 600;">${escapeHtml(booking.flight.flightNumber)}</span>
+                                </td>
+                                <td>
+                                    <strong>${escapeHtml(booking.flight.source)} ➔ ${escapeHtml(booking.flight.destination)}</strong><br>
+                                    <span style="font-size:0.8rem; color:var(--text-secondary);">${booking.flight.flightType || 'DOMESTIC'}</span>
+                                </td>
+                                <td>
+                                    <strong>${escapeHtml(booking.passengerName)}</strong><br>
+                                    <span style="font-size:0.8rem; color:var(--text-secondary);">${escapeHtml(booking.passengerEmail)}</span>
+                                </td>
+                                <td>
+                                    <span style="font-family:monospace; background:rgba(0,0,0,0.05); padding:0.2rem 0.4rem; border-radius:0.25rem; font-weight:700;">
+                                        ${escapeHtml(booking.seatNumber)}
+                                    </span>
+                                </td>
+                                <td>${new Date(booking.bookingDate).toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'})}</td>
+                                <td>
+                                    <span class="status-pill ${statusClass}">${booking.status}</span>
+                                </td>
+                                <td>
+                                    ${booking.status === 'CONFIRMED' ? `<button onclick="viewAndDownloadTicket(${booking.id})" class="btn btn-primary" style="padding:0.35rem 0.7rem; font-size:0.75rem; margin-bottom:0.25rem; width:100%;">🎫 View Ticket</button>` : '<span style="color:var(--text-secondary); font-size:0.8rem;">—</span>'}
+                                </td>
+                                <td>
+                                    ${canCancel ? 
+                                        `<button onclick="cancelBooking(${booking.id})" class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem;">Cancel</button>` : 
+                                        `<span style="color:var(--text-secondary); font-style:italic;">No Action</span>`
+                                    }
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.insertAdjacentHTML('beforeend', row);
+                        bookingsData[booking.id] = booking;
+                    });
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                                You have not booked any flights yet. <a href="home.html" style="color:var(--accent); text-decoration:none; font-weight:700;">Find Flights</a>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--danger); padding: 3rem;">
+                            Error loading bookings. Please refresh the page.
+                        </td>
+                    </tr>
+                `;
+                console.error(err);
+            }
+        }
+
+        // Cancel Booking
+        async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/bookings/${bookingId}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    alertContainer.innerHTML = `<div class="alert alert-success">Booking cancellation successful! Your refund is processing.</div>`;
+                    loadBookings();
+                } else {
+                    alertContainer.innerHTML = `<div class="alert alert-danger">${result.message || 'Cancellation failed'}</div>`;
+                }
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">Error processing cancellation.</div>`;
+                console.error(err);
+            }
+        }
+
+        // View and Download Ticket
+        function viewAndDownloadTicket(bookingId) {
+            const b = bookingsData[bookingId];
+            if (!b) { alert('Booking data not found.'); return; }
+            const f = b.flight;
+            const bookingRef = `BK-${b.id}`;
+            const gate = ['A','B','C','D'][Math.floor(Math.random()*4)] + Math.floor(Math.random()*20+1);
+            const srcCode = f.source.substring(0,3).toUpperCase();
+            const dstCode = f.destination.substring(0,3).toUpperCase();
+            const deptDate = f.departureTime ? new Date(f.departureTime) : new Date(b.bookingDate);
+            const boardingTime = new Date(deptDate.getTime() - 45*60000);
+
+            // Create ticket modal
+            let ticketModal = document.getElementById('ticketDownloadModal');
+            if (!ticketModal) {
+                ticketModal = document.createElement('div');
+                ticketModal.id = 'ticketDownloadModal';
+                ticketModal.className = 'modal';
+                document.body.appendChild(ticketModal);
+            }
+            ticketModal.innerHTML = `
+                <div class="modal-content" style="max-width:750px; background:#0b0f19; border:none; padding:0; border-radius:1.25rem; overflow:hidden;">
+                    <div id="ticketBody" style="display:flex; font-family:'Outfit',sans-serif;">
+                        <div style="flex:1; padding:2rem; position:relative; overflow:hidden;">
+                            <div style="position:absolute;right:-20px;bottom:-30px;font-size:10rem;opacity:0.05;">✈</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                                <div style="font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">✈ Deccan Airways</div>
+                                <div style="background:rgba(255,255,255,0.1);padding:0.3rem 0.8rem;border-radius:0.375rem;font-size:0.85rem;font-weight:700;font-family:monospace;color:#fff;">${escapeHtml(f.flightNumber)}</div>
+                            </div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin:1.5rem 0;">
+                                <div style="text-align:center;"><div style="font-size:2.5rem;font-weight:800;color:#e2e8f0;">${srcCode}</div><div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${escapeHtml(f.source)}</div></div>
+                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 1.5rem;"><div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);"></div><div style="color:#60a5fa;font-size:1.4rem;margin:0.4rem 0;">✈</div><div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);"></div><div style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.4rem;">Non-Stop</div></div>
+                                <div style="text-align:center;"><div style="font-size:2.5rem;font-weight:800;color:#e2e8f0;">${dstCode}</div><div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${escapeHtml(f.destination)}</div></div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1);">
+                                <div><div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);">Passenger</div><div style="font-size:0.9rem;font-weight:700;color:#e2e8f0;">${escapeHtml(b.passengerName)}</div></div>
+                                <div><div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);">Date</div><div style="font-size:0.9rem;font-weight:700;color:#e2e8f0;">${deptDate.toLocaleDateString([],{day:'2-digit',month:'short',year:'numeric'})}</div></div>
+                                <div><div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);">Gate</div><div style="font-size:0.9rem;font-weight:700;color:#e2e8f0;">${gate}</div></div>
+                                <div><div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);">Boarding</div><div style="font-size:0.9rem;font-weight:700;color:#e2e8f0;">${boardingTime.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>
+                                <div><div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);">Terminal</div><div style="font-size:0.9rem;font-weight:700;color:#e2e8f0;">T2</div></div>
+                                <div><div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);">Class</div><div style="font-size:0.9rem;font-weight:700;color:#e2e8f0;">Economy</div></div>
+                            </div>
+                            <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;">
+                                <div style="background:rgba(16,185,129,0.2);color:#10b981;padding:0.3rem 0.75rem;border-radius:9999px;font-size:0.85rem;font-weight:700;">✓ CONFIRMED</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-family:monospace;">${bookingRef}</div>
+                            </div>
+                        </div>
+                        <div style="width:140px;background:linear-gradient(135deg,#1e40af,#7c3aed);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 0.75rem;position:relative;">
+                            <div style="position:absolute;left:0;top:15px;bottom:15px;width:2px;background:repeating-linear-gradient(to bottom,transparent,transparent 8px,rgba(255,255,255,0.2) 8px,rgba(255,255,255,0.2) 12px);"></div>
+                            <div style="background:#fff;padding:8px;border-radius:0.5rem;" id="bkQrWrap"></div>
+                            <div style="font-size:0.75rem;font-weight:800;color:#fff;text-align:center;font-family:monospace;margin-top:0.75rem;letter-spacing:0.05em;">${bookingRef}</div>
+                            <div style="margin-top:0.75rem;text-align:center;"><div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);">Seat</div><div style="font-size:1.8rem;font-weight:800;color:#fff;">${escapeHtml(b.seatNumber)}</div></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:1rem;justify-content:center;padding:1.25rem; background:#0b0f19; flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="downloadBoardingPDF(${b.id})">⬇️ Download PDF</button>
+                        <button class="btn btn-secondary" onclick="shareBooking(${b.id})">📤 Share</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('ticketDownloadModal').classList.remove('show')">✕ Close</button>
+                    </div>
+                </div>
+            `;
+            ticketModal.classList.add('show');
+
+            // QR code
+            setTimeout(() => {
+                try {
+                    new QRCode(document.getElementById('bkQrWrap'), {
+                        text: `DECCAN-${bookingRef}-${f.flightNumber}-${b.seatNumber}`,
+                        width: 90, height: 90, colorDark: '#0b0f19', colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                } catch(e) {}
+            }, 100);
+        }
+
+        async function downloadBoardingPDF(bookingId) {
+            const btn = event.target;
+            btn.disabled = true; btn.textContent = '⏳ Generating...';
+            try {
+                const { jsPDF } = window.jspdf;
+                const canvas = await html2canvas(document.getElementById('ticketBody'), { scale: 2, backgroundColor: '#0b0f19' });
+                const img = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a5' });
+                const w = pdf.internal.pageSize.getWidth();
+                const h = (canvas.height * w) / canvas.width;
+                pdf.addImage(img, 'PNG', 0, 0, w, h);
+                pdf.save(`DeccanAirways-BK${bookingId}.pdf`);
+            } catch(e) { alert('PDF generation failed.'); }
+            btn.disabled = false; btn.textContent = '⬇️ Download PDF';
+        }
+
+        function shareBooking(bookingId) {
+            const b = bookingsData[bookingId];
+            const text = `✈️ My Deccan Airways Booking!\nFlight: ${b.flight.flightNumber}\n${b.flight.source} → ${b.flight.destination}\nPassenger: ${b.passengerName}\nSeat: ${b.seatNumber}\nBooking #${b.id}`;
+            if (navigator.share) { navigator.share({ title: 'Deccan Airways Ticket', text }); }
+            else { window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); }
+        }
+
+        // Profile Modal Logic
+        function openProfileModal() {
+            document.getElementById('profileAlert').innerHTML = '';
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profilePassword').value = '';
+            document.getElementById('profilePassport').value = currentUser.passport || '';
+            document.getElementById('profileVisa').value = currentUser.visa || '';
+            document.getElementById('profileModal').classList.add('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const profileAlert = document.getElementById('profileAlert');
+            profileAlert.innerHTML = '<div class="alert alert-warning">Updating profile settings...</div>';
+
+            const name = document.getElementById('profileName').value;
+            const email = document.getElementById('profileEmail').value;
+            const password = document.getElementById('profilePassword').value;
+            const passport = document.getElementById('profilePassport').value;
+            const visa = document.getElementById('profileVisa').value;
+
+            const updatePayload = { name, email, passport, visa };
+            if (password.trim() !== '') {
+                updatePayload.password = password;
+            }
+
+            try {
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    currentUser = result.data;
+                    document.getElementById('userName').textContent = currentUser.name;
+                    profileAlert.innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
+                    setTimeout(() => {
+                        closeProfileModal();
+                    }, 1000);
+                } else {
+                    profileAlert.innerHTML = `<div class="alert alert-danger">${result.message || 'Failed to update profile'}</div>`;
+                }
+            } catch (err) {
+                profileAlert.innerHTML = '<div class="alert alert-danger">Network error. Failed to update profile.</div>';
+                console.error(err);
+            }
+        });
+
+        // Helper to avoid HTML Injection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking History - Deccan Airways</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="home.html" class="nav-logo">
+            <span>✈</span> Deccan Airways
+        </a>
+        <ul class="nav-links">
+            <li><a href="home.html">Flights</a></li>
+            <li><a href="booking.html">My Bookings</a></li>
+            <li><a href="history.html" class="active">History</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li id="adminNavLink" style="display: none;"><a href="admin.html" style="color: #ea580c; font-weight: 700;">Admin Panel</a></li>
+            <li>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme">🌓</button>
+            </li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-info" style="cursor: pointer;" onclick="window.location.href='profile.html'" title="View/Edit Profile">
+                <div class="nav-user-name" id="userName">Loading...</div>
+                <div class="nav-user-role" id="userRole" style="color: var(--accent); font-weight: 600;">User ⚙</div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Log Out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Activity & Transaction History</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;" id="historySubtitle">Timeline of flight bookings and cancellations</p>
+
+            <div class="timeline" id="historyTimeline">
+                <p style="text-align: center; color: var(--text-secondary);">Loading timeline activity...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal (View/Edit Basic Info, Passport, Visa) -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+            <h2 class="card-title">My Travel Profile</h2>
+            <div id="profileAlert"></div>
+            
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="profileName" class="form-label">Full Name</label>
+                    <input type="text" id="profileName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileEmail" class="form-label">Email Address</label>
+                    <input type="email" id="profileEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="profilePassword" class="form-label">Password (Leave blank to keep unchanged)</label>
+                    <input type="password" id="profilePassword" class="form-control" placeholder="••••••••">
+                </div>
+                
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 1rem 0; border-top: 1px solid var(--border-color); padding-top: 1rem;">Travel Documents</h3>
+                
+                <div class="form-group">
+                    <label for="profilePassport" class="form-label">Passport Number (Required for Domestic flights)</label>
+                    <input type="text" id="profilePassport" class="form-control" placeholder="e.g. L1234567">
+                </div>
+                <div class="form-group">
+                    <label for="profileVisa" class="form-label">Visa Details/ID (Required for International flights)</label>
+                    <input type="text" id="profileVisa" class="form-control" placeholder="e.g. V7654321 - UAE Valid">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Profile Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Theme management
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (!res.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                const result = await res.json();
+                currentUser = result.data;
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userRole').textContent = currentUser.role === 'ADMIN' ? 'Admin ⚙' : 'User ⚙';
+
+                if (currentUser.role === 'ADMIN') {
+                    document.getElementById('adminNavLink').style.display = 'block';
+                    document.getElementById('historySubtitle').textContent = "Administrator View: Monitoring all booking activities.";
+                } else {
+                    document.getElementById('historySubtitle').textContent = `Activity history logs linked to ${currentUser.email}`;
+                }
+
+                loadHistory();
+            } catch (err) {
+                console.error(err);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'login.html';
+        }
+
+        // Fetch logs
+        async function loadHistory() {
+            const timeline = document.getElementById('historyTimeline');
+            let endpoint = currentUser.role === 'ADMIN' ? '/api/history' : `/api/history/user/${encodeURIComponent(currentUser.email)}`;
+
+            try {
+                const res = await fetch(endpoint);
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    timeline.innerHTML = '';
+                    result.data.forEach(item => {
+                        const date = new Date(item.actionDate).toLocaleString();
+                        const isCancel = item.action === 'CANCEL';
+                        
+                        const itemHtml = `
+                            <div class="timeline-item">
+                                <div class="timeline-dot ${isCancel ? 'cancel' : ''}"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-time">${date}</div>
+                                    <div class="timeline-title" style="color: ${isCancel ? 'var(--danger)' : 'var(--success)'};">
+                                        [Booking ID: #${item.bookingId}] ${item.action} - Flight: ${escapeHtml(item.flightNumber)}
+                                    </div>
+                                    <div class="timeline-desc">
+                                        ${escapeHtml(item.details)}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: right; font-weight: 600;">
+                                        Passenger Account: ${escapeHtml(item.userEmail)}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        timeline.insertAdjacentHTML('beforeend', itemHtml);
+                    });
+                } else {
+                    timeline.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No history log entries found.</p>';
+                }
+            } catch (err) {
+                timeline.innerHTML = '<p style="text-align: center; color: var(--danger); padding: 2rem;">Error loading logs. Please refresh.</p>';
+                console.error(err);
+            }
+        }
+
+        // Profile Modal Logic
+        function openProfileModal() {
+            document.getElementById('profileAlert').innerHTML = '';
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profilePassword').value = '';
+            document.getElementById('profilePassport').value = currentUser.passport || '';
+            document.getElementById('profileVisa').value = currentUser.visa || '';
+            document.getElementById('profileModal').classList.add('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const profileAlert = document.getElementById('profileAlert');
+            profileAlert.innerHTML = '<div class="alert alert-warning">Updating profile settings...</div>';
+
+            const name = document.getElementById('profileName').value;
+            const email = document.getElementById('profileEmail').value;
+            const password = document.getElementById('profilePassword').value;
+            const passport = document.getElementById('profilePassport').value;
+            const visa = document.getElementById('profileVisa').value;
+
+            const updatePayload = { name, email, passport, visa };
+            if (password.trim() !== '') {
+                updatePayload.password = password;
+            }
+
+            try {
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    currentUser = result.data;
+                    document.getElementById('userName').textContent = currentUser.name;
+                    profileAlert.innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
+                    setTimeout(() => {
+                        closeProfileModal();
+                    }, 1000);
+                } else {
+                    profileAlert.innerHTML = `<div class="alert alert-danger">${result.message || 'Failed to update profile'}</div>`;
+                }
+            } catch (err) {
+                profileAlert.innerHTML = '<div class="alert alert-danger">Network error. Failed to update profile.</div>';
+                console.error(err);
+            }
+        });
+
+        // Helper to avoid HTML Injection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deccan Airways - Fly Beyond Horizons</title>
+    <meta name="description" content="Deccan Airways - India's premier airline. Book domestic and international flights with premium service and unbeatable fares.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <span>✈</span> Deccan Airways
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme">🌓</button>
+            </li>
+            <li><a href="login.html" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Log In</a></li>
+            <li><a href="register.html" class="btn btn-primary" style="padding: 0.5rem 1rem;">Sign Up</a></li>
+        </ul>
+    </nav>
+
+    <!-- Active Coupon Banner (dynamically injected) -->
+    <div id="couponBannerWrapper"></div>
+
+    <div class="container" style="margin-top: 2rem;">
+        
+        <!-- Image Slider Carousel -->
+        <div class="slider-container">
+            <div class="slider-track">
+                <!-- Slide 1 -->
+                <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&auto=format&fit=crop&q=80');">
+                    <div class="slide-overlay">
+                        <h1 class="slide-title">Welcome to Deccan Airways</h1>
+                        <p class="slide-subtitle">Experience a new standard of luxury air travel. Fly to premier domestic and international destinations with seamless comfort.</p>
+                        <a href="login.html" class="btn btn-primary" style="padding: 1rem 2rem;">Book Your Journey Now</a>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&auto=format&fit=crop&q=80');">
+                    <div class="slide-overlay">
+                        <h1 class="slide-title">Vibrant Indian Destinations</h1>
+                        <p class="slide-subtitle">Explore Delhi, Mumbai, Hyderabad, Bangalore, and Chennai. Experience domestic travel with world-class hospitality.</p>
+                        <a href="login.html" class="btn btn-primary" style="padding: 1rem 2rem;">Explore Routes</a>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1200&auto=format&fit=crop&q=80');">
+                    <div class="slide-overlay">
+                        <h1 class="slide-title">Global Connectivity</h1>
+                        <p class="slide-subtitle">Connect to London, New York, Singapore, Dubai, Paris, and Tokyo. Save your visa and passport details for quick international bookings.</p>
+                        <a href="login.html" class="btn btn-primary" style="padding: 1rem 2rem;">View International Flights</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-dots" id="sliderDots">
+                <div class="slider-dot active" onclick="setSlide(0)"></div>
+                <div class="slider-dot" onclick="setSlide(1)"></div>
+                <div class="slider-dot" onclick="setSlide(2)"></div>
+            </div>
+        </div>
+
+        <!-- Website Highlights Section -->
+        <h2 class="highlights-title">Why Fly Deccan Airways?</h2>
+        <div class="grid grid-cols-4">
+            <div class="highlight-card">
+                <div class="highlight-icon">🌐</div>
+                <h3 class="highlight-name">Expansive Network</h3>
+                <p class="highlight-desc">Enjoy flights covering 50+ routes across key Indian metropolises and premier international hubs worldwide.</p>
+            </div>
+            <div class="highlight-card">
+                <div class="highlight-icon">🛋️</div>
+                <h3 class="highlight-name">Premium Cabin Comfort</h3>
+                <p class="highlight-desc">Spacious legroom, delicious inflight meals, and customized lounge services to keep you refreshed throughout your trip.</p>
+            </div>
+            <div class="highlight-card">
+                <div class="highlight-icon">⚡</div>
+                <h3 class="highlight-name">Instant Booking & Verification</h3>
+                <p class="highlight-desc">Verify your passport for domestic flights and visa for international routes instantly. No repetitive paperwork required.</p>
+            </div>
+            <div class="highlight-card">
+                <div class="highlight-icon">🛡️</div>
+                <h3 class="highlight-name">Secure Profile Storage</h3>
+                <p class="highlight-desc">Keep your travel documentation updated in your secure profile and enjoy immediate booking authorizations.</p>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             COMPANY HISTORY & ACHIEVEMENTS SECTION
+             ========================================== -->
+        <div class="history-section" id="history">
+            <h2 class="history-section-title">Our Journey & Achievements</h2>
+            <p class="history-section-subtitle">Two decades of excellence in Indian aviation — connecting millions of passengers to their destinations with pride, safety, and world-class service.</p>
+
+            <!-- Stats Counters -->
+            <div class="stats-counter-row">
+                <div class="stats-counter-card">
+                    <div class="counter-value" data-target="22">0</div>
+                    <div class="counter-label">Years of Service</div>
+                </div>
+                <div class="stats-counter-card">
+                    <div class="counter-value" data-target="50">0</div>
+                    <div class="counter-label">+ Routes Worldwide</div>
+                </div>
+                <div class="stats-counter-card">
+                    <div class="counter-value" data-target="120">0</div>
+                    <div class="counter-label">Aircraft Fleet</div>
+                </div>
+                <div class="stats-counter-card">
+                    <div class="counter-value" data-target="15">0</div>
+                    <div class="counter-label">M+ Passengers Served</div>
+                </div>
+                <div class="stats-counter-card">
+                    <div class="counter-value" data-target="98">0</div>
+                    <div class="counter-label">% On-Time Rate</div>
+                </div>
+                <div class="stats-counter-card">
+                    <div class="counter-value" data-target="35">0</div>
+                    <div class="counter-label">Industry Awards</div>
+                </div>
+            </div>
+
+            <!-- Milestones -->
+            <h3 class="milestones-title">🏆 Key Milestones</h3>
+            <div class="milestones-grid">
+                <div class="milestone-card">
+                    <div class="milestone-year">2002</div>
+                    <div class="milestone-icon">🚀</div>
+                    <div class="milestone-title">Founded & First Flight</div>
+                    <div class="milestone-desc">Deccan Airways took its inaugural flight from Mumbai to Delhi on January 15, 2002 — launching India's most trusted aviation brand.</div>
+                </div>
+                <div class="milestone-card">
+                    <div class="milestone-year">2006</div>
+                    <div class="milestone-icon">🌍</div>
+                    <div class="milestone-title">First International Route</div>
+                    <div class="milestone-desc">Expanded beyond borders with our first international route to Dubai, opening a new chapter in South Asian connectivity.</div>
+                </div>
+                <div class="milestone-card">
+                    <div class="milestone-year">2010</div>
+                    <div class="milestone-icon">🏅</div>
+                    <div class="milestone-title">Best Domestic Airline Award</div>
+                    <div class="milestone-desc">Honoured by the Ministry of Civil Aviation as India's Best Domestic Airline for outstanding service quality and punctuality.</div>
+                </div>
+                <div class="milestone-card">
+                    <div class="milestone-year">2015</div>
+                    <div class="milestone-icon">✈️</div>
+                    <div class="milestone-title">Fleet Expansion to 80 Aircraft</div>
+                    <div class="milestone-desc">Doubled our fleet with next-generation Boeing 737 MAX and Airbus A320neo aircraft, reducing carbon emissions by 20%.</div>
+                </div>
+                <div class="milestone-card">
+                    <div class="milestone-year">2019</div>
+                    <div class="milestone-icon">💻</div>
+                    <div class="milestone-title">Digital Transformation</div>
+                    <div class="milestone-desc">Launched our AI-powered booking platform, enabling instant document verification, smart seat selection, and real-time flight tracking.</div>
+                </div>
+                <div class="milestone-card">
+                    <div class="milestone-year">2024</div>
+                    <div class="milestone-icon">🌱</div>
+                    <div class="milestone-title">Net Zero Pledge</div>
+                    <div class="milestone-desc">Committed to achieving net-zero carbon emissions by 2040 with sustainable aviation fuel partnerships and carbon offset programs.</div>
+                </div>
+            </div>
+
+            <!-- Awards Row -->
+            <div class="awards-row">
+                <div class="award-badge"><span class="award-icon">🥇</span> Best Domestic Airline 2023</div>
+                <div class="award-badge"><span class="award-icon">⭐</span> 5-Star Safety Rating</div>
+                <div class="award-badge"><span class="award-icon">🌿</span> Green Aviation Award</div>
+                <div class="award-badge"><span class="award-icon">💎</span> Premium Service Excellence</div>
+                <div class="award-badge"><span class="award-icon">🤝</span> Customer Trust Index #1</div>
+                <div class="award-badge"><span class="award-icon">⚡</span> Best On-Time Performance</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check Authentication and redirect if already logged in
+        fetch('/api/auth/me')
+            .then(res => {
+                if (res.ok) {
+                    window.location.href = 'home.html';
+                }
+            })
+            .catch(err => console.log('Not logged in:', err));
+
+        // Dark/Light Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Load initial theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Image Slider logic
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.slider-dot');
+        const slideInterval = 4000; // 4 seconds
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function setSlide(n) {
+            showSlide(n);
+            resetTimer();
+        }
+
+        let slideTimer = setInterval(() => {
+            showSlide(currentSlide + 1);
+        }, slideInterval);
+
+        function resetTimer() {
+            clearInterval(slideTimer);
+            slideTimer = setInterval(() => {
+                showSlide(currentSlide + 1);
+            }, slideInterval);
+        }
+
+        // ===== Coupon Banner =====
+        function renderCouponBanner() {
+            const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+            const wrapper = document.getElementById('couponBannerWrapper');
+            if (coupons.length === 0) { wrapper.innerHTML = ''; return; }
+
+            // Show the most recent active coupon
+            const latest = coupons[coupons.length - 1];
+            wrapper.innerHTML = `
+                <div class="coupon-banner" id="couponBanner">
+                    🎟️ Exclusive Offer! Use code
+                    <span class="coupon-code-pill">${latest.code}</span>
+                    and get <strong>${latest.discount}% OFF</strong> your next booking!
+                    <a href="login.html" style="color:#fff; font-weight:800; text-decoration:underline; margin-left:0.25rem;">Book Now →</a>
+                    <button class="close-banner" onclick="document.getElementById('couponBanner').style.display='none'" title="Dismiss">✕</button>
+                </div>
+            `;
+        }
+        renderCouponBanner();
+
+        // ===== Counter Animation =====
+        function animateCounters() {
+            const counterEls = document.querySelectorAll('.counter-value[data-target]');
+            counterEls.forEach(el => {
+                const target = parseInt(el.dataset.target);
+                let start = 0;
+                const duration = 1800;
+                const step = target / (duration / 16);
+                const timer = setInterval(() => {
+                    start = Math.min(start + step, target);
+                    el.textContent = Math.floor(start);
+                    if (start >= target) {
+                        el.textContent = target;
+                        clearInterval(timer);
+                    }
+                }, 16);
+            });
+        }
+
+        // Trigger counter animation when section enters viewport
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.2 });
+
+        const historySection = document.getElementById('history');
+        if (historySection) observer.observe(historySection);
+    </script>
+</body>
+</html>

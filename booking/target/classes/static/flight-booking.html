@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Flight - Deccan Airways</title>
+    <meta name="description" content="Complete your flight booking with Deccan Airways. Add meals, accommodation, insurance and more.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .booking-hero {
+            background: var(--accent-gradient);
+            padding: 2rem;
+            border-radius: 1.25rem;
+            color: #fff;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .booking-hero::before {
+            content: '✈';
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 6rem;
+            opacity: 0.15;
+        }
+        .booking-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .booking-hero .route-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+        .booking-hero .route-arrow { font-size: 1.2rem; opacity: 0.8; }
+        .booking-hero .flight-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            opacity: 0.85;
+            flex-wrap: wrap;
+        }
+
+        .booking-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .booking-layout { grid-template-columns: 1fr; }
+        }
+
+        /* Add-on cards */
+        .addon-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        @media (max-width: 600px) { .addon-grid { grid-template-columns: 1fr; } }
+
+        .addon-card {
+            border: 2px solid var(--border-color);
+            border-radius: 0.875rem;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .addon-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        .addon-card.selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(124,58,237,0.06) 100%);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+        }
+        .addon-card input[type="checkbox"] {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        .addon-icon { font-size: 2rem; }
+        .addon-name { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+        .addon-desc { font-size: 0.8rem; color: var(--text-secondary); }
+        .addon-price { font-weight: 800; color: var(--accent); font-size: 0.95rem; margin-top: 0.25rem; }
+
+        /* Meal toggle */
+        .meal-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .meal-btn {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+        .meal-btn.active {
+            border-color: var(--accent);
+            background: rgba(37,99,235,0.08);
+            color: var(--accent);
+        }
+
+        /* Price Summary Card */
+        .price-summary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 100px;
+        }
+        .price-summary h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .price-row.total {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            border-top: 2px solid var(--border-color);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+        }
+        .price-row.discount { color: var(--success); }
+        .price-row span:last-child { font-weight: 600; }
+
+        /* Coupon */
+        .coupon-box {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .coupon-box input {
+            flex: 1;
+            padding: 0.65rem 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .coupon-box input:focus { outline: none; border-color: var(--accent); }
+        .coupon-status {
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.375rem;
+        }
+        .coupon-status.valid { background: rgba(22,163,74,0.1); color: var(--success); }
+        .coupon-status.invalid { background: rgba(220,38,38,0.1); color: var(--danger); }
+
+        /* Section headings */
+        .section-heading {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin: 1.75rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .gender-btn {
+            flex: 1;
+            padding: 0.65rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .gender-btn.active {
+            border-color: var(--accent);
+            background: rgba(37,99,235,0.08);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="home.html" class="nav-logo">
+            <span>✈</span> Deccan Airways
+        </a>
+        <ul class="nav-links">
+            <li><a href="home.html">Flights</a></li>
+            <li><a href="booking.html">My Bookings</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li id="adminNavLink" style="display: none;"><a href="admin.html" style="color: #ea580c; font-weight: 700;">Admin Panel</a></li>
+            <li>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme">🌓</button>
+            </li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-name" id="userName">Loading...</div>
+            <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Log Out</button>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 1100px;">
+
+        <!-- Flight Summary Hero -->
+        <div class="booking-hero" id="bookingHero">
+            <div style="font-size: 0.85rem; opacity: 0.8; font-weight: 600;">✈ Complete Your Booking</div>
+            <h1 id="heroAirline">Loading Flight...</h1>
+            <div class="route-display">
+                <span id="heroSource">---</span>
+                <span class="route-arrow">──────✈──────</span>
+                <span id="heroDestination">---</span>
+            </div>
+            <div class="flight-meta">
+                <span>🎫 <strong id="heroFlightNum">---</strong></span>
+                <span>📅 <strong id="heroDeparture">---</strong></span>
+                <span>💰 Base: <strong id="heroPrice">$0</strong>/seat</span>
+                <span id="heroTypeBadge" style="background:rgba(255,255,255,0.2); padding:0.2rem 0.6rem; border-radius:0.25rem;">DOMESTIC</span>
+            </div>
+        </div>
+
+        <div class="booking-layout">
+            <!-- LEFT: Booking Form -->
+            <div>
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h2 class="card-title" style="font-size: 1.3rem;">👤 Passenger Details</h2>
+
+                    <div class="grid grid-cols-2" style="gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="passengerName">Full Name *</label>
+                            <input type="text" id="passengerName" class="form-control" placeholder="e.g. Ravi Kumar" required oninput="updateSummary()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="passengerAge">Age *</label>
+                            <input type="number" id="passengerAge" class="form-control" placeholder="e.g. 28" min="1" max="120" required oninput="updateSummary()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="passengerEmail">Email Address *</label>
+                            <input type="email" id="passengerEmail" class="form-control" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="passengerPhone">Phone Number *</label>
+                            <input type="tel" id="passengerPhone" class="form-control" placeholder="+91 9876543210" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Gender *</label>
+                        <div class="gender-options">
+                            <button type="button" class="gender-btn active" id="genderMale" onclick="selectGender('Male')">♂ Male</button>
+                            <button type="button" class="gender-btn" id="genderFemale" onclick="selectGender('Female')">♀ Female</button>
+                            <button type="button" class="gender-btn" id="genderOther" onclick="selectGender('Other')">⚧ Other</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="numSeats">Number of Seats *</label>
+                        <select id="numSeats" class="form-control" onchange="updateSummary()">
+                            <option value="1">1 Seat</option>
+                            <option value="2">2 Seats</option>
+                            <option value="3">3 Seats</option>
+                            <option value="4">4 Seats</option>
+                            <option value="5">5 Seats</option>
+                            <option value="6">6 Seats</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Add-ons -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h2 class="card-title" style="font-size: 1.3rem;">🪑 Select Cabin Class</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">Choose your travel class. Business and First Class include premium perks at an additional fare multiplier.</p>
+
+                    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:1rem;">
+                        <!-- Economy -->
+                        <div class="addon-card selected" id="classEconomy" onclick="selectCabinClass('economy')" style="position:relative;">
+                            <input type="radio" name="cabinClass" style="position:absolute;top:0.75rem;right:0.75rem;" checked>
+                            <div class="addon-icon">🪑</div>
+                            <div class="addon-name">Economy</div>
+                            <div class="addon-price" style="color:var(--success);">Base Price</div>
+                            <ul style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.8;">
+                                <li>Standard seat (28" pitch)</li>
+                                <li>1 carry-on bag</li>
+                                <li>Complimentary snacks</li>
+                                <li>In-seat entertainment</li>
+                            </ul>
+                        </div>
+
+                        <!-- Business Class -->
+                        <div class="addon-card" id="classBusiness" onclick="selectCabinClass('business')" style="position:relative; border-color:rgba(37,99,235,0.3);">
+                            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent-gradient);color:#fff;font-size:0.68rem;font-weight:800;padding:0.2rem 0.75rem;border-radius:9999px;white-space:nowrap;">POPULAR</div>
+                            <input type="radio" name="cabinClass" style="position:absolute;top:0.75rem;right:0.75rem;">
+                            <div class="addon-icon">💼</div>
+                            <div class="addon-name">Business</div>
+                            <div class="addon-price">+85% fare</div>
+                            <ul style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.8;">
+                                <li>Lie-flat seat (60" pitch)</li>
+                                <li>2 checked bags (32kg each)</li>
+                                <li>Premium 3-course meal</li>
+                                <li>Airport lounge access</li>
+                                <li>Priority check-in & boarding</li>
+                                <li>Noise-cancelling headphones</li>
+                            </ul>
+                        </div>
+
+                        <!-- First Class -->
+                        <div class="addon-card" id="classFirst" onclick="selectCabinClass('first')" style="position:relative; border-color:rgba(234,179,8,0.4);">
+                            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;font-size:0.68rem;font-weight:800;padding:0.2rem 0.75rem;border-radius:9999px;white-space:nowrap;">✦ LUXURY</div>
+                            <input type="radio" name="cabinClass" style="position:absolute;top:0.75rem;right:0.75rem;">
+                            <div class="addon-icon">👑</div>
+                            <div class="addon-name">First Class</div>
+                            <div class="addon-price" style="color:#d97706;">+200% fare</div>
+                            <ul style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.8;">
+                                <li>Private suite (80" pitch)</li>
+                                <li>3 checked bags (40kg each)</li>
+                                <li>Michelin-star dining</li>
+                                <li>Dedicated butler service</li>
+                                <li>Luxury amenity kit</li>
+                                <li>Chauffeur transfer (select routes)</li>
+                                <li>Exclusive first-class lounge</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add-ons -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h2 class="card-title" style="font-size: 1.3rem;">✨ Enhance Your Journey</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1rem;">Add these extras to make your trip more comfortable. Prices are per seat.</p>
+
+                    <div class="addon-grid">
+                        <div class="addon-card" id="addonAccomCard" onclick="toggleAddon('accommodation')">
+                            <input type="checkbox" id="addonAccommodation" onchange="updateSummary()">
+                            <div class="addon-icon">🏨</div>
+                            <div class="addon-name">Accommodation</div>
+                            <div class="addon-desc">Hotel stay at destination city for 1 night</div>
+                            <div class="addon-price">+$50 / seat</div>
+                        </div>
+
+                        <div class="addon-card" id="addonSafeCard" onclick="toggleAddon('safe')">
+                            <input type="checkbox" id="addonSafe" onchange="updateSummary()">
+                            <div class="addon-icon">🔒</div>
+                            <div class="addon-name">Safe Package</div>
+                            <div class="addon-desc">Travel insurance & emergency assistance</div>
+                            <div class="addon-price">+$30 / seat</div>
+                        </div>
+
+                        <div class="addon-card" id="addonPriorityCard" onclick="toggleAddon('priority')">
+                            <input type="checkbox" id="addonPriority" onchange="updateSummary()">
+                            <div class="addon-icon">🎯</div>
+                            <div class="addon-name">Priority Boarding</div>
+                            <div class="addon-desc">Board first & choose your preferred seat</div>
+                            <div class="addon-price">+$15 / seat</div>
+                        </div>
+
+                        <div class="addon-card" id="addonMealCard" onclick="toggleAddon('meal')">
+                            <input type="checkbox" id="addonMeal" onchange="updateSummary()">
+                            <div class="addon-icon">🍽️</div>
+                            <div class="addon-name">Meal Selection</div>
+                            <div class="addon-desc">Premium inflight meal of your choice</div>
+                            <div class="addon-price">+$10 / seat</div>
+                        </div>
+                    </div>
+
+                    <!-- Meal type sub-option -->
+                    <div id="mealTypeSection" style="display:none; margin-top: 1rem; padding: 1rem; background: var(--bg-primary); border-radius: 0.75rem; border: 1px solid var(--border-color);">
+                        <div class="form-label" style="margin-bottom: 0.5rem;">🥗 Choose Meal Type</div>
+                        <div class="meal-toggle">
+                            <button type="button" class="meal-btn active" id="mealVeg" onclick="selectMeal('veg')">🥦 Vegetarian</button>
+                            <button type="button" class="meal-btn" id="mealNonVeg" onclick="selectMeal('nonveg')">🍗 Non-Vegetarian</button>
+                            <button type="button" class="meal-btn" id="mealVegan" onclick="selectMeal('vegan')">🌱 Vegan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Verification (if needed) -->
+                <div class="card" id="docCard" style="display:none; margin-bottom:1.5rem;">
+                    <h2 class="card-title" style="font-size: 1.3rem;">📄 Document Verification</h2>
+                    <div class="alert alert-warning" id="docWarning"></div>
+                    <div class="form-group">
+                        <label class="form-label" id="docLabel">Document Number</label>
+                        <input type="text" id="docInput" class="form-control" placeholder="Enter document number">
+                    </div>
+                </div>
+
+                <div id="bookingAlert"></div>
+
+                <button class="btn btn-primary" style="width:100%; padding:1.1rem; font-size:1.1rem;" id="proceedBtn" onclick="proceedToPayment()">
+                    💳 Pay Now — <span id="btnTotal">$0</span>
+                </button>
+            </div>
+
+            <!-- RIGHT: Price Summary -->
+            <div class="price-summary">
+                <h3>🧾 Price Summary</h3>
+
+                <div class="price-row">
+                    <span id="summaryRoute">Flight</span>
+                    <span id="summaryBasePrice">$0</span>
+                </div>
+                <div class="price-row" id="rowSeats" style="display:none;">
+                    <span>× <span id="summarySeats">1</span> seat(s)</span>
+                    <span id="summarySeatsPrice">$0</span>
+                </div>
+                <div class="price-row" id="rowAccom" style="display:none;">
+                    <span>🏨 Accommodation</span>
+                    <span id="priceAccom">+$0</span>
+                </div>
+                <div class="price-row" id="rowSafe" style="display:none;">
+                    <span>🔒 Safe Package</span>
+                    <span id="priceSafe">+$0</span>
+                </div>
+                <div class="price-row" id="rowPriority" style="display:none;">
+                    <span>🎯 Priority Boarding</span>
+                    <span id="pricePriority">+$0</span>
+                </div>
+                <div class="price-row" id="rowMeal" style="display:none;">
+                    <span>🍽️ Meal (<span id="mealTypeLabel">Veg</span>)</span>
+                    <span id="priceMeal">+$0</span>
+                </div>
+
+                <!-- Coupon -->
+                <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                    <div class="form-label">🎟️ Coupon Code</div>
+                    <div class="coupon-box">
+                        <input type="text" id="couponInput" placeholder="ENTER CODE" oninput="this.value = this.value.toUpperCase()">
+                        <button class="btn btn-secondary" style="padding: 0.65rem 1rem; font-size:0.85rem;" onclick="applyCoupon()">Apply</button>
+                    </div>
+                    <div id="couponStatus"></div>
+                </div>
+
+                <div class="price-row discount" id="rowDiscount" style="display:none;">
+                    <span>🎉 Coupon Discount</span>
+                    <span id="priceDiscount">-$0</span>
+                </div>
+
+                <div class="price-row total">
+                    <span>Total Amount</span>
+                    <span id="summaryTotal" style="color: var(--success); font-size:1.4rem;">$0</span>
+                </div>
+
+                <div style="margin-top: 1rem; font-size:0.78rem; color:var(--text-secondary); line-height:1.6;">
+                    ✅ Price includes all taxes<br>
+                    ✅ Free cancellation within 24 hours<br>
+                    ✅ Secure payment gateway
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let flightData = null;
+        let selectedGender = 'Male';
+        let selectedMeal = 'veg';
+        let appliedCoupon = null;
+        let couponDiscount = 0;
+        let selectedCabinClass = 'economy';
+        const CABIN_MULTIPLIERS = { economy: 1.0, business: 1.85, first: 3.0 };
+
+        // Addon prices per seat
+        const ADDON_PRICES = {
+            accommodation: 50,
+            safe: 30,
+            priority: 15,
+            meal: 10
+        };
+
+        // Theme management
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (!res.ok) {
+                    // Don't redirect — just show a warning banner and lock checkout
+                    document.getElementById('userName').textContent = 'Not logged in';
+                    document.getElementById('bookingAlert').innerHTML =
+                        '<div class="alert alert-danger">⚠️ Your session has expired. Please <a href="login.html" style="color:var(--accent);font-weight:700;">log in</a> to proceed with booking.</div>';
+                    document.getElementById('proceedBtn').disabled = true;
+                    document.getElementById('proceedBtn').style.opacity = '0.5';
+                    document.getElementById('proceedBtn').textContent = '🔒 Please Log In';
+                    loadFlightData(); // still show flight info
+                    return;
+                }
+                const result = await res.json();
+                currentUser = result.data;
+                document.getElementById('userName').textContent = currentUser.name;
+                if (currentUser.role === 'ADMIN') document.getElementById('adminNavLink').style.display = 'block';
+
+                // Pre-fill passenger info
+                document.getElementById('passengerName').value = currentUser.name || '';
+                document.getElementById('passengerEmail').value = currentUser.email || '';
+
+                loadFlightData();
+            } catch (err) {
+                // Network error — still show the page, warn in UI
+                document.getElementById('userName').textContent = 'Session Error';
+                document.getElementById('bookingAlert').innerHTML =
+                    '<div class="alert alert-warning">⚠️ Could not verify your session. Please <a href="login.html" style="color:var(--accent);font-weight:700;">log in</a> again to book.</div>';
+                document.getElementById('proceedBtn').disabled = true;
+                document.getElementById('proceedBtn').style.opacity = '0.5';
+                document.getElementById('proceedBtn').textContent = '🔒 Session Error';
+                loadFlightData();
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'login.html';
+        }
+
+        function loadFlightData() {
+            const stored = sessionStorage.getItem('selectedFlight');
+            if (!stored) { window.location.href = 'home.html'; return; }
+            flightData = JSON.parse(stored);
+
+            // Populate hero
+            document.getElementById('heroAirline').textContent = flightData.airline;
+            document.getElementById('heroSource').textContent = flightData.source;
+            document.getElementById('heroDestination').textContent = flightData.destination;
+            document.getElementById('heroFlightNum').textContent = flightData.flightNumber;
+            document.getElementById('heroDeparture').textContent = flightData.departureTime ? new Date(flightData.departureTime).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '---';
+            document.getElementById('heroPrice').textContent = '$' + flightData.price;
+            document.getElementById('heroTypeBadge').textContent = flightData.flightType || 'DOMESTIC';
+
+            // Check if document needed
+            checkDocumentRequirement();
+
+            updateSummary();
+        }
+
+        function checkDocumentRequirement() {
+            const isDomestic = (flightData.flightType || 'DOMESTIC') === 'DOMESTIC';
+            const docCard = document.getElementById('docCard');
+            const docWarning = document.getElementById('docWarning');
+            const docLabel = document.getElementById('docLabel');
+            const docInput = document.getElementById('docInput');
+
+            const verif = JSON.parse(localStorage.getItem('doc_verif_' + currentUser.id) || '{}');
+            const passportStatus = verif.passport || (currentUser.passport ? 'pending' : 'none');
+            const visaStatus = verif.visa || (currentUser.visa ? 'pending' : 'none');
+
+            docCard.style.display = 'block';
+
+            if (isDomestic) {
+                docLabel.textContent = 'Passport Number';
+                docInput.value = currentUser.passport || '';
+                docInput.disabled = true;
+
+                if (passportStatus === 'verified') {
+                    docCard.style.background = 'rgba(22,163,74,0.08)';
+                    docCard.style.borderColor = 'rgba(22,163,74,0.3)';
+                    docWarning.className = 'alert alert-success';
+                    docWarning.innerHTML = '✅ <strong>Passport Verified!</strong> You are authorized to book this domestic flight.';
+                } else if (passportStatus === 'pending') {
+                    docWarning.className = 'alert alert-warning';
+                    docWarning.innerHTML = '⏳ <strong>Passport Pending Verification!</strong> Your passport details are being reviewed by the admin. <a href="profile.html" style="color:var(--accent); font-weight:700;">Check status on Profile →</a>';
+                } else if (passportStatus === 'rejected') {
+                    docWarning.className = 'alert alert-danger';
+                    docWarning.innerHTML = '❌ <strong>Passport Verification Rejected!</strong> The admin rejected your passport. Please submit valid details. <a href="profile.html" style="color:var(--accent); font-weight:700;">Go to Profile →</a>';
+                } else {
+                    docWarning.className = 'alert alert-warning';
+                    docWarning.innerHTML = '⚠️ <strong>Passport Submission Required!</strong> You must submit passport details on your profile and have them verified by the admin before booking. <a href="profile.html" style="color:var(--accent); font-weight:700;">Go to Profile to submit →</a>';
+                }
+            } else {
+                docLabel.textContent = 'Visa Details / ID';
+                docInput.value = currentUser.visa || '';
+                docInput.disabled = true;
+
+                if (visaStatus === 'verified') {
+                    docCard.style.background = 'rgba(22,163,74,0.08)';
+                    docCard.style.borderColor = 'rgba(22,163,74,0.3)';
+                    docWarning.className = 'alert alert-success';
+                    docWarning.innerHTML = '✅ <strong>Visa Verified!</strong> You are authorized to book this international flight.';
+                } else if (visaStatus === 'pending') {
+                    docWarning.className = 'alert alert-warning';
+                    docWarning.innerHTML = '⏳ <strong>Visa Pending Verification!</strong> Your visa details are being reviewed by the admin. <a href="profile.html" style="color:var(--accent); font-weight:700;">Check status on Profile →</a>';
+                } else if (visaStatus === 'rejected') {
+                    docWarning.className = 'alert alert-danger';
+                    docWarning.innerHTML = '❌ <strong>Visa Verification Rejected!</strong> The admin rejected your visa. Please submit valid details. <a href="profile.html" style="color:var(--accent); font-weight:700;">Go to Profile →</a>';
+                } else {
+                    docWarning.className = 'alert alert-warning';
+                    docWarning.innerHTML = '⚠️ <strong>Visa Submission Required!</strong> You must submit visa details on your profile and have them verified by the admin before booking. <a href="profile.html" style="color:var(--accent); font-weight:700;">Go to Profile to submit →</a>';
+                }
+            }
+        }
+
+        function selectGender(gender) {
+            selectedGender = gender;
+            ['Male','Female','Other'].forEach(g => {
+                document.getElementById('gender' + g).classList.toggle('active', g === gender);
+            });
+        }
+
+        function toggleAddon(addon) {
+            const checkbox = document.getElementById('addon' + addon.charAt(0).toUpperCase() + addon.slice(1));
+            const card = document.getElementById('addon' + addon.charAt(0).toUpperCase() + addon.slice(1) + 'Card');
+            checkbox.checked = !checkbox.checked;
+            card.classList.toggle('selected', checkbox.checked);
+
+            if (addon === 'meal') {
+                document.getElementById('mealTypeSection').style.display = checkbox.checked ? 'block' : 'none';
+            }
+            updateSummary();
+        }
+
+        function selectCabinClass(cls) {
+            selectedCabinClass = cls;
+            ['economy','business','first'].forEach(c => {
+                const el = document.getElementById('class' + c.charAt(0).toUpperCase() + c.slice(1));
+                el.classList.toggle('selected', c === cls);
+                el.querySelector('input[type=radio]').checked = c === cls;
+            });
+            updateSummary();
+        }
+
+        function selectMeal(type) {
+            selectedMeal = type;
+            ['Veg','NonVeg','Vegan'].forEach(m => document.getElementById('meal' + m).classList.remove('active'));
+            const idMap = { veg: 'mealVeg', nonveg: 'mealNonVeg', vegan: 'mealVegan' };
+            const labelMap = { veg: 'Vegetarian', nonveg: 'Non-Veg', vegan: 'Vegan' };
+            document.getElementById(idMap[type]).classList.add('active');
+            document.getElementById('mealTypeLabel').textContent = labelMap[type];
+        }
+
+        function applyCoupon() {
+            const code = document.getElementById('couponInput').value.trim().toUpperCase();
+            const statusEl = document.getElementById('couponStatus');
+            if (!code) { statusEl.innerHTML = ''; return; }
+
+            const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+            const match = coupons.find(c => c.code.toUpperCase() === code);
+
+            if (match) {
+                appliedCoupon = match;
+                couponDiscount = match.discount;
+                statusEl.innerHTML = `<div class="coupon-status valid">✅ Coupon applied! ${match.discount}% off</div>`;
+            } else {
+                appliedCoupon = null;
+                couponDiscount = 0;
+                statusEl.innerHTML = `<div class="coupon-status invalid">❌ Invalid or expired coupon code</div>`;
+            }
+            updateSummary();
+        }
+
+        function updateSummary() {
+            if (!flightData) return;
+
+            const seats = parseInt(document.getElementById('numSeats').value) || 1;
+            const basePrice = parseFloat(flightData.price) || 0;
+            const cabinMultiplier = CABIN_MULTIPLIERS[selectedCabinClass] || 1;
+            const classFare = basePrice * cabinMultiplier;
+            const baseTotal = classFare * seats;
+
+            let addonsTotal = 0;
+            const accomChecked = document.getElementById('addonAccommodation').checked;
+            const safeChecked = document.getElementById('addonSafe').checked;
+            const priorityChecked = document.getElementById('addonPriority').checked;
+            const mealChecked = document.getElementById('addonMeal').checked;
+
+            if (accomChecked) addonsTotal += ADDON_PRICES.accommodation * seats;
+            if (safeChecked) addonsTotal += ADDON_PRICES.safe * seats;
+            if (priorityChecked) addonsTotal += ADDON_PRICES.priority * seats;
+            if (mealChecked) addonsTotal += ADDON_PRICES.meal * seats;
+
+            const subtotal = baseTotal + addonsTotal;
+            const discountAmt = couponDiscount > 0 ? (subtotal * couponDiscount / 100) : 0;
+            const finalTotal = subtotal - discountAmt;
+
+            // Update summary rows
+            document.getElementById('summaryRoute').textContent = `${flightData.source} → ${flightData.destination}`;
+            document.getElementById('summaryBasePrice').textContent = `$${basePrice.toFixed(2)}`;
+            document.getElementById('summarySeats').textContent = seats;
+            document.getElementById('summarySeatsPrice').textContent = `$${baseTotal.toFixed(2)}`;
+            document.getElementById('rowSeats').style.display = seats > 1 ? 'flex' : 'none';
+
+            toggleRow('rowAccom', accomChecked, 'priceAccom', ADDON_PRICES.accommodation * seats);
+            toggleRow('rowSafe', safeChecked, 'priceSafe', ADDON_PRICES.safe * seats);
+            toggleRow('rowPriority', priorityChecked, 'pricePriority', ADDON_PRICES.priority * seats);
+            toggleRow('rowMeal', mealChecked, 'priceMeal', ADDON_PRICES.meal * seats);
+
+            if (couponDiscount > 0) {
+                document.getElementById('rowDiscount').style.display = 'flex';
+                document.getElementById('priceDiscount').textContent = `-$${discountAmt.toFixed(2)}`;
+            } else {
+                document.getElementById('rowDiscount').style.display = 'none';
+            }
+
+            document.getElementById('summaryTotal').textContent = `$${finalTotal.toFixed(2)}`;
+            document.getElementById('btnTotal').textContent = `$${finalTotal.toFixed(2)}`;
+        }
+
+        function toggleRow(rowId, show, priceId, amount) {
+            const row = document.getElementById(rowId);
+            row.style.display = show ? 'flex' : 'none';
+            if (show) document.getElementById(priceId).textContent = `+$${amount.toFixed(2)}`;
+        }
+
+        function proceedToPayment() {
+            const alertEl = document.getElementById('bookingAlert');
+            alertEl.innerHTML = '';
+
+            const name = document.getElementById('passengerName').value.trim();
+            const age = document.getElementById('passengerAge').value.trim();
+            const email = document.getElementById('passengerEmail').value.trim();
+            const phone = document.getElementById('passengerPhone').value.trim();
+            const seats = document.getElementById('numSeats').value;
+
+            if (!name || !age || !email || !phone) {
+                alertEl.innerHTML = '<div class="alert alert-danger">⚠️ Please fill in all passenger details.</div>';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            // Must be logged in
+            if (!currentUser) {
+                alertEl.innerHTML = '<div class="alert alert-danger">⚠️ Your session has expired. Please <a href="login.html" style="color:var(--accent);font-weight:700;">log in</a> to book a ticket.</div>';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+
+            // Check document verification status before proceeding
+            const verif = JSON.parse(localStorage.getItem('doc_verif_' + currentUser.id) || '{}');
+            const isDomestic = (flightData.flightType || 'DOMESTIC') === 'DOMESTIC';
+            const status = isDomestic ? (verif.passport || (currentUser.passport ? 'pending' : 'none')) : (verif.visa || (currentUser.visa ? 'pending' : 'none'));
+
+            if (status !== 'verified') {
+                alertEl.innerHTML = `<div class="alert alert-danger">⚠️ <strong>Verification was not completed</strong>. Please submit your details on the <a href="profile.html" style="color:var(--accent); font-weight:700;">Profile page</a> and wait for the admin to verify them first.</div>`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            const accomChecked = document.getElementById('addonAccommodation').checked;
+            const safeChecked = document.getElementById('addonSafe').checked;
+            const priorityChecked = document.getElementById('addonPriority').checked;
+            const mealChecked = document.getElementById('addonMeal').checked;
+            const seatsNum = parseInt(seats);
+            const basePrice = parseFloat(flightData.price) || 0;
+
+            let addonsTotal = 0;
+            if (accomChecked) addonsTotal += ADDON_PRICES.accommodation * seatsNum;
+            if (safeChecked) addonsTotal += ADDON_PRICES.safe * seatsNum;
+            if (priorityChecked) addonsTotal += ADDON_PRICES.priority * seatsNum;
+            if (mealChecked) addonsTotal += ADDON_PRICES.meal * seatsNum;
+
+            const subtotal = (basePrice * seatsNum) + addonsTotal;
+            const discountAmt = couponDiscount > 0 ? (subtotal * couponDiscount / 100) : 0;
+            const finalTotal = subtotal - discountAmt;
+
+            const cabinMultiplier = CABIN_MULTIPLIERS[selectedCabinClass] || 1;
+            const classFare = basePrice * cabinMultiplier;
+
+            const bookingPayload = {
+                flight: flightData,
+                passenger: {
+                    name, age, email, phone,
+                    gender: selectedGender,
+                    seats: seatsNum,
+                    cabinClass: selectedCabinClass
+                },
+                addons: {
+                    accommodation: accomChecked,
+                    safePackage: safeChecked,
+                    priorityBoarding: priorityChecked,
+                    meal: mealChecked,
+                    mealType: mealChecked ? selectedMeal : null
+                },
+                pricing: {
+                    basePrice: classFare * seatsNum,
+                    addonsTotal,
+                    discountAmt,
+                    finalTotal,
+                    coupon: appliedCoupon ? appliedCoupon.code : null,
+                    couponDiscount
+                },
+                docInput: currentUser.passport || currentUser.visa || null
+            };
+
+            sessionStorage.setItem('bookingPayload', JSON.stringify(bookingPayload));
+            window.location.href = 'payment.html';
+        }
+
+        // Initialize
+        checkAuth();
+
+        // Load any active coupon banner
+        const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+        if (coupons.length > 0) {
+            const latest = coupons[coupons.length - 1];
+            const banner = document.createElement('div');
+            banner.style.cssText = 'background: linear-gradient(90deg,#f59e0b,#ef4444); color:#fff; text-align:center; padding:0.6rem; font-weight:700; font-size:0.9rem; letter-spacing:0.03em; position:sticky; top:72px; z-index:99; animation: pulse 2s infinite;';
+            banner.innerHTML = `🎟️ Use code <strong>${latest.code}</strong> for ${latest.discount}% OFF your booking!`;
+            document.querySelector('.container').insertAdjacentElement('beforebegin', banner);
+        }
+    </script>
+</body>
+</html>

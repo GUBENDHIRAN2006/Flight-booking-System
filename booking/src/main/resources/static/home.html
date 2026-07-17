@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Flights - Deccan Airways</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="home.html" class="nav-logo">
+            <span>✈</span> Deccan Airways
+        </a>
+        <ul class="nav-links">
+            <li><a href="home.html" class="active">Flights</a></li>
+            <li><a href="booking.html">My Bookings</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li id="adminNavLink" style="display: none;"><a href="admin.html" style="color: #ea580c; font-weight: 700;">Admin Panel</a></li>
+            <li>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme">🌓</button>
+            </li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-info" style="cursor: pointer;" onclick="window.location.href='profile.html'" title="View/Edit Profile">
+                <div class="nav-user-name" id="userName">Loading...</div>
+                <div class="nav-user-role" id="userRole" style="color: var(--accent); font-weight: 600;">User ⚙</div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- Active Coupon Banner -->
+    <div id="couponBannerWrapper"></div>
+
+    <div class="container">
+        <!-- Search Card -->
+        <div class="card">
+            <h2 class="card-title">Search & Filter Flights</h2>
+            <form id="searchForm" class="grid grid-cols-3" style="align-items: end;">
+                <div class="form-group">
+                    <label for="source" class="form-label">Departure City</label>
+                    <input type="text" id="source" class="form-control" placeholder="e.g. Mumbai">
+                </div>
+                <div class="form-group">
+                    <label for="destination" class="form-label">Arrival City</label>
+                    <input type="text" id="destination" class="form-control" placeholder="e.g. Dubai">
+                </div>
+                <div class="form-group">
+                    <label for="date" class="form-label">Departure Date</label>
+                    <input type="date" id="date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="airline" class="form-label">Airline</label>
+                    <input type="text" id="airline" class="form-control" placeholder="e.g. Deccan Airways">
+                </div>
+                <div class="form-group">
+                    <label for="maxPrice" class="form-label">Maximum Price (USD)</label>
+                    <input type="number" id="maxPrice" class="form-control" placeholder="e.g. 500">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Search Flights</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Slideshow of Top Flights & Visited Places -->
+        <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; overflow: hidden; position: relative;">
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">🌎 Top Booked Airways & Popular Destinations</h3>
+            
+            <div class="slider-container" style="height: 260px; border-radius: 0.875rem; box-shadow: var(--shadow-sm); overflow: hidden; position: relative;">
+                <div class="slider-track" id="homeSliderTrack" style="display: flex; height: 100%; transition: transform 0.5s ease-in-out; width: 400%;">
+                    <!-- Slide 1: Deccan Premium Airways -->
+                    <div style="width: 25%; height: 100%; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop&q=80') center/cover; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; box-sizing: border-box;">
+                        <span style="background: var(--accent-gradient); font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 9999px; width: fit-content; margin-bottom: 0.5rem; letter-spacing: 0.05em; color: #fff;">TOP AIRLINE</span>
+                        <h4 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: #fff;">Deccan Premium Class Airways</h4>
+                        <p style="font-size: 0.88rem; opacity: 0.85; margin: 0.25rem 0 0 0; color: #fff;">Enjoy flatbed seats, chef-curated dining, and high-speed Wi-Fi on all international routes.</p>
+                    </div>
+
+                    <!-- Slide 2: London -->
+                    <div style="width: 25%; height: 100%; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1513635269975-59663e0ca1ad?w=800&auto=format&fit=crop&q=80') center/cover; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; box-sizing: border-box;">
+                        <span style="background: #10b981; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 9999px; width: fit-content; margin-bottom: 0.5rem; letter-spacing: 0.05em; color: #fff;">TRENDING CITY</span>
+                        <h4 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: #fff;">London, United Kingdom</h4>
+                        <p style="font-size: 0.88rem; opacity: 0.85; margin: 0.25rem 0 0 0; color: #fff;">Fly from Delhi starting at just $499. Explore Tower Bridge and royal history.</p>
+                    </div>
+
+                    <!-- Slide 3: Dubai -->
+                    <div style="width: 25%; height: 100%; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&auto=format&fit=crop&q=80') center/cover; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; box-sizing: border-box;">
+                        <span style="background: #ea580c; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 9999px; width: fit-content; margin-bottom: 0.5rem; letter-spacing: 0.05em; color: #fff;">MOST BOOKED</span>
+                        <h4 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: #fff;">Dubai, United Arab Emirates</h4>
+                        <p style="font-size: 0.88rem; opacity: 0.85; margin: 0.25rem 0 0 0; color: #fff;">Experience world-class shopping and luxury. Daily flights from Mumbai and Delhi.</p>
+                    </div>
+
+                    <!-- Slide 4: Singapore -->
+                    <div style="width: 25%; height: 100%; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&auto=format&fit=crop&q=80') center/cover; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; box-sizing: border-box;">
+                        <span style="background: #8b5cf6; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 9999px; width: fit-content; margin-bottom: 0.5rem; letter-spacing: 0.05em; color: #fff;">TOP DESTINATION</span>
+                        <h4 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: #fff;">Singapore, Changi Hub</h4>
+                        <p style="font-size: 0.88rem; opacity: 0.85; margin: 0.25rem 0 0 0; color: #fff;">Direct flights available. Visit Gardens by the Bay and Marina Bay Sands.</p>
+                    </div>
+                </div>
+
+                <!-- Slide Dots -->
+                <div style="position: absolute; bottom: 1rem; right: 1rem; display: flex; gap: 0.5rem;">
+                    <div class="h-dot active" style="width: 8px; height: 8px; border-radius: 50%; background: #fff; cursor: pointer; opacity: 1; transition: opacity 0.2s;" onclick="setHomeSlide(0)"></div>
+                    <div class="h-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #fff; cursor: pointer; opacity: 0.4; transition: opacity 0.2s;" onclick="setHomeSlide(1)"></div>
+                    <div class="h-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #fff; cursor: pointer; opacity: 0.4; transition: opacity 0.2s;" onclick="setHomeSlide(2)"></div>
+                    <div class="h-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #fff; cursor: pointer; opacity: 0.4; transition: opacity 0.2s;" onclick="setHomeSlide(3)"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Flights Grid -->
+        <h2 style="margin-bottom: 1.5rem; font-weight: 800; letter-spacing: -0.01em;">Available Flights</h2>
+        <div id="flightsContainer" class="grid grid-cols-3">
+            <p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">Loading flights...</p>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="card-title" id="modalTitle">Book Flight</h2>
+            
+            <div id="modalAlert"></div>
+            
+            <!-- Document Verification Prompt (Conditional) -->
+            <div id="docVerificationSection" style="display: none;">
+                <div class="alert alert-warning">
+                    <strong id="docWarningTitle">Document Required</strong>
+                    <p id="docWarningText" class="mt-1">Please upload the required document before booking this flight.</p>
+                </div>
+                <form id="docUploadForm">
+                    <div class="form-group">
+                        <label for="requiredDocInput" class="form-label" id="docInputLabel">Document Details</label>
+                        <input type="text" id="requiredDocInput" class="form-control" required placeholder="Enter number/ID">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="saveDocBtn">Verify & Proceed</button>
+                </form>
+            </div>
+
+            <!-- Standard Booking Form -->
+            <form id="bookingForm" style="display: block;">
+                <input type="hidden" id="modalFlightId">
+                <div class="form-group">
+                    <label class="form-label">Flight Details</label>
+                    <div id="modalFlightSummary" style="background-color: var(--bg-primary); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="passengerName" class="form-label">Passenger Name</label>
+                    <input type="text" id="passengerName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="passengerEmail" class="form-label">Passenger Email</label>
+                    <input type="email" id="passengerEmail" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Modal (View/Edit Basic Info, Passport, Visa) -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+            <h2 class="card-title">My Travel Profile</h2>
+            <div id="profileAlert"></div>
+            
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="profileName" class="form-label">Full Name</label>
+                    <input type="text" id="profileName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileEmail" class="form-label">Email Address</label>
+                    <input type="email" id="profileEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="profilePassword" class="form-label">Password (Leave blank to keep unchanged)</label>
+                    <input type="password" id="profilePassword" class="form-control" placeholder="••••••••">
+                </div>
+                
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 1rem 0; border-top: 1px solid var(--border-color); padding-top: 1rem;">Travel Documents</h3>
+                
+                <div class="form-group">
+                    <label for="profilePassport" class="form-label">Passport Number (Required for Domestic flights)</label>
+                    <input type="text" id="profilePassport" class="form-control" placeholder="e.g. L1234567">
+                </div>
+                <div class="form-group">
+                    <label for="profileVisa" class="form-label">Visa Details/ID (Required for International flights)</label>
+                    <input type="text" id="profileVisa" class="form-control" placeholder="e.g. V7654321 - UAE Valid">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Profile Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let flightsMap = {}; // stores all loaded flights by ID
+
+        // Theme management
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (!res.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                const result = await res.json();
+                currentUser = result.data;
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userRole').textContent = currentUser.role === 'ADMIN' ? 'Admin ⚙' : 'User ⚙';
+
+                if (currentUser.role === 'ADMIN') {
+                    document.getElementById('adminNavLink').style.display = 'block';
+                }
+
+                // Default passenger details in modal to logged in user
+                document.getElementById('passengerName').value = currentUser.name;
+                document.getElementById('passengerEmail').value = currentUser.email;
+
+                loadFlights();
+            } catch (err) {
+                console.error(err);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'login.html';
+        }
+
+        // Load and filter flights
+        async function loadFlights(e) {
+            if (e) e.preventDefault();
+            
+            const source = document.getElementById('source').value;
+            const destination = document.getElementById('destination').value;
+            const date = document.getElementById('date').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            const airline = document.getElementById('airline').value;
+
+            let query = `?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}&date=${encodeURIComponent(date)}&maxPrice=${maxPrice}&airline=${encodeURIComponent(airline)}`;
+
+            const container = document.getElementById('flightsContainer');
+            container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">Loading flights...</p>';
+            flightsMap = {}; // reset map on each load
+
+            try {
+                const res = await fetch(`/api/flights${query}`);
+                const result = await res.json();
+                
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = '';
+                    result.data.forEach(flight => {
+                        const depTime = new Date(flight.departureTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+                        const arrTime = new Date(flight.arrivalTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+                        
+                        const isSoldOut = flight.availableSeats <= 0;
+                        const seatColorClass = flight.availableSeats <= 5 ? 'low' : '';
+
+                        // Fallback image if null
+                        const bgImage = flight.imageUrl || 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500';
+                        const flightType = flight.flightType || 'DOMESTIC';
+
+                        const cardHtml = `
+                            <div class="flight-card">
+                                <div class="flight-card-image" style="background-image: url('${bgImage}');">
+                                    <span class="flight-type-badge ${flightType.toLowerCase()}">${flightType}</span>
+                                </div>
+                                <div class="flight-card-content">
+                                    <div>
+                                        <div class="flight-header">
+                                            <span class="airline-name">${escapeHtml(flight.airline)}</span>
+                                            <span class="flight-number">${escapeHtml(flight.flightNumber)}</span>
+                                        </div>
+                                        <div class="flight-route">
+                                            <div class="route-point">
+                                                <div class="time">${new Date(flight.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                                <div class="city">${escapeHtml(flight.source)}</div>
+                                            </div>
+                                            <div class="route-divider"></div>
+                                            <div class="route-point">
+                                                <div class="time">${new Date(flight.arrivalTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                                <div class="city">${escapeHtml(flight.destination)}</div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin: 0.5rem 0; line-height: 1.4;">
+                                            <strong>Departure:</strong> ${depTime}<br>
+                                            <strong>Arrival:</strong> ${arrTime}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flight-footer">
+                                            <div class="price-tag">$${flight.price}<span>/way</span></div>
+                                            <div class="seats-left ${seatColorClass}">${flight.availableSeats} seats left</div>
+                                        </div>
+                                        <button 
+                                            onclick="handleBookButtonClick(${flight.id})"
+                                            class="btn ${isSoldOut ? 'btn-secondary' : 'btn-primary'}" 
+                                            style="width: 100%; margin-top: 1rem;" 
+                                            ${isSoldOut ? 'disabled' : ''}>
+                                            ${isSoldOut ? 'Sold Out' : '✈ Book Now'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', cardHtml);
+                        flightsMap[flight.id] = flight;
+                    });
+                } else {
+                    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 2rem;">No flights found matching your search.</p>';
+                }
+            } catch (err) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--danger); padding: 2rem;">Error fetching flights. Please try again.</p>';
+                console.error(err);
+            }
+        }
+
+        // Handle Booking - navigate to flight-booking.html with flight data
+        let selectedFlight = null;
+
+        function handleBookButtonClick(flightId) {
+            const flight = flightsMap[flightId];
+            if (!flight) { alert('Flight data not found. Please refresh.'); return; }
+            selectedFlight = {
+                flightId: flight.id,
+                id: flight.id,
+                airline: flight.airline,
+                flightNumber: flight.flightNumber,
+                source: flight.source,
+                destination: flight.destination,
+                price: flight.price,
+                flightType: flight.flightType || 'DOMESTIC',
+                departureTime: flight.departureTime,
+                arrivalTime: flight.arrivalTime
+            };
+            sessionStorage.setItem('selectedFlight', JSON.stringify(selectedFlight));
+            window.location.href = 'flight-booking.html';
+        }
+
+        function showDocUploadPrompt(docType) {
+            document.getElementById('bookingForm').style.display = 'none';
+            document.getElementById('docVerificationSection').style.display = 'block';
+
+            if (docType === 'passport') {
+                document.getElementById('docWarningTitle').textContent = 'Passport Required (Domestic Route)';
+                document.getElementById('docWarningText').textContent = 'Deccan Airways rules require a valid passport number to register domestic reservations. Please enter your Passport ID below:';
+                document.getElementById('docInputLabel').textContent = 'Passport Number';
+                document.getElementById('requiredDocInput').placeholder = 'e.g. Z99988877';
+            } else {
+                document.getElementById('docWarningTitle').textContent = 'Visa Required (International Route)';
+                document.getElementById('docWarningText').textContent = 'This flight operates on an international route. A valid Visa details/ID is required to proceed. Please enter your Visa details below:';
+                document.getElementById('docInputLabel').textContent = 'Visa Details / ID';
+                document.getElementById('requiredDocInput').placeholder = 'e.g. VISA-DXB-55432';
+            }
+
+            document.getElementById('bookingModal').classList.add('show');
+        }
+
+        function showBookingConfirmForm() {
+            document.getElementById('docVerificationSection').style.display = 'none';
+            document.getElementById('bookingForm').style.display = 'block';
+            document.getElementById('bookingModal').classList.add('show');
+        }
+
+        // Save doc details and proceed
+        document.getElementById('docUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const docValue = document.getElementById('requiredDocInput').value;
+            const docType = selectedFlight.flightType === 'DOMESTIC' ? 'passport' : 'visa';
+
+            // Construct payload for profile update
+            const updatePayload = {
+                name: currentUser.name,
+                email: currentUser.email,
+                passport: docType === 'passport' ? docValue : currentUser.passport,
+                visa: docType === 'visa' ? docValue : currentUser.visa
+            };
+
+            const modalAlert = document.getElementById('modalAlert');
+            modalAlert.innerHTML = '<div class="alert alert-warning">Verifying document details...</div>';
+
+            try {
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+                const result = await res.json();
+                
+                if (res.ok && result.success) {
+                    currentUser = result.data; // Sync current user locally
+                    modalAlert.innerHTML = '<div class="alert alert-success">Document verified successfully!</div>';
+                    setTimeout(() => {
+                        modalAlert.innerHTML = '';
+                        showBookingConfirmForm();
+                    }, 800);
+                } else {
+                    modalAlert.innerHTML = `<div class="alert alert-danger">${result.message || 'Verification failed'}</div>`;
+                }
+            } catch (err) {
+                modalAlert.innerHTML = '<div class="alert alert-danger">Network error while verifying documents.</div>';
+                console.error(err);
+            }
+        });
+
+        // Form Submit booking
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const flightId = document.getElementById('modalFlightId').value;
+            const passengerName = document.getElementById('passengerName').value;
+            const passengerEmail = document.getElementById('passengerEmail').value;
+            const modalAlert = document.getElementById('modalAlert');
+
+            try {
+                const res = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        flightId,
+                        passengerName,
+                        passengerEmail
+                    })
+                });
+                
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    modalAlert.innerHTML = '<div class="alert alert-success">Booking confirmed successfully!</div>';
+                    loadFlights(); // refresh listings
+                    setTimeout(() => {
+                        closeModal();
+                    }, 1200);
+                } else {
+                    modalAlert.innerHTML = `<div class="alert alert-danger">${result.message || 'Booking failed'}</div>`;
+                }
+            } catch (err) {
+                modalAlert.innerHTML = '<div class="alert alert-danger">Network error. Failed to book.</div>';
+                console.error(err);
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('bookingModal').classList.remove('show');
+            document.getElementById('requiredDocInput').value = '';
+            selectedFlight = null;
+        }
+
+        // Profile Modal Logic
+        function openProfileModal() {
+            document.getElementById('profileAlert').innerHTML = '';
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profilePassword').value = '';
+            document.getElementById('profilePassport').value = currentUser.passport || '';
+            document.getElementById('profileVisa').value = currentUser.visa || '';
+            document.getElementById('profileModal').classList.add('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const profileAlert = document.getElementById('profileAlert');
+            profileAlert.innerHTML = '<div class="alert alert-warning">Updating profile settings...</div>';
+
+            const name = document.getElementById('profileName').value;
+            const email = document.getElementById('profileEmail').value;
+            const password = document.getElementById('profilePassword').value;
+            const passport = document.getElementById('profilePassport').value;
+            const visa = document.getElementById('profileVisa').value;
+
+            const updatePayload = { name, email, passport, visa };
+            if (password.trim() !== '') {
+                updatePayload.password = password;
+            }
+
+            try {
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    currentUser = result.data;
+                    document.getElementById('userName').textContent = currentUser.name;
+                    profileAlert.innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
+                    setTimeout(() => {
+                        closeProfileModal();
+                    }, 1000);
+                } else {
+                    profileAlert.innerHTML = `<div class="alert alert-danger">${result.message || 'Failed to update profile'}</div>`;
+                }
+            } catch (err) {
+                profileAlert.innerHTML = '<div class="alert alert-danger">Network error. Failed to update profile.</div>';
+                console.error(err);
+            }
+        });
+
+        document.getElementById('searchForm').addEventListener('submit', loadFlights);
+
+        // ===== Coupon Banner =====
+        function renderCouponBanner() {
+            const coupons = JSON.parse(localStorage.getItem('deccan_coupons') || '[]');
+            const wrapper = document.getElementById('couponBannerWrapper');
+            if (coupons.length === 0) { wrapper.innerHTML = ''; return; }
+            const latest = coupons[coupons.length - 1];
+            wrapper.innerHTML = `
+                <div class="coupon-banner" id="couponBanner">
+                    🎟️ Exclusive Offer! Use code
+                    <span class="coupon-code-pill">${latest.code}</span>
+                    and get <strong>${latest.discount}% OFF</strong> your next booking!
+                    <button class="close-banner" onclick="document.getElementById('couponBanner').style.display='none'" title="Dismiss">✕</button>
+                </div>
+            `;
+        }
+        renderCouponBanner();
+
+        // ===== Home Image Slider Logic =====
+        let currentHomeSlide = 0;
+        const totalHomeSlides = 4;
+        let homeSlideTimer = null;
+
+        function showHomeSlide(n) {
+            const track = document.getElementById('homeSliderTrack');
+            if (!track) return;
+            currentHomeSlide = (n + totalHomeSlides) % totalHomeSlides;
+            track.style.transform = `translateX(-${currentHomeSlide * 25}%)`;
+            
+            const dots = document.querySelectorAll('.h-dot');
+            dots.forEach((dot, idx) => {
+                dot.style.opacity = idx === currentHomeSlide ? '1' : '0.4';
+                dot.classList.toggle('active', idx === currentHomeSlide);
+            });
+        }
+
+        function setHomeSlide(n) {
+            showHomeSlide(n);
+            resetHomeSlideTimer();
+        }
+
+        function resetHomeSlideTimer() {
+            clearInterval(homeSlideTimer);
+            homeSlideTimer = setInterval(() => {
+                showHomeSlide(currentHomeSlide + 1);
+            }, 4000);
+        }
+
+        // Start slideshow timer
+        resetHomeSlideTimer();
+
+        // Helper to avoid HTML Injection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initialize Page
+        checkAuth();
+    </script>
+</body>
+</html>
